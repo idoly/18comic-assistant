@@ -1,5 +1,4 @@
-package xyz.idoly.comic.config;
-// package xyz.idoly.demo.config;
+// package xyz.idoly.comic.config;
 
 // import static java.net.Proxy.Type.valueOf;
 

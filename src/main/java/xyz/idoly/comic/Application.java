@@ -11,6 +11,10 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.web.client.RestClient;
 
 import jakarta.annotation.Resource;
+import xyz.idoly.comic.entity.Album;
+import xyz.idoly.comic.entity.Comic;
+import xyz.idoly.comic.repository.AlbumRepository;
+import xyz.idoly.comic.repository.ComicRepository;
 import xyz.idoly.comic.service.ComicService;
 
 @SpringBootApplication
@@ -29,6 +33,12 @@ public class Application {
 	@Resource
 	private ComicService comicService;
 
+	@Resource
+    private ComicRepository comicRepository;
+
+    @Resource 
+    private AlbumRepository albumRepository;
+
 	public static void main(String[] args) throws Exception {
 		SpringApplication.run(Application.class, args);
 	}
@@ -39,8 +49,9 @@ public class Application {
 	public CommandLineRunner runner() {
 		return (args) -> {
 
-			String rootPath = System.getProperty("user.dir");
-			System.out.println("当前项目根路径: " + rootPath);
+
+			// String rootPath = System.getProperty("user.dir");
+			// System.out.println("当前项目根路径: " + rootPath);
 			// try {
 			// 	String response = restClient.post().uri("/login")
 			// 	.header(HttpHeaders.CONTENT_TYPE, "application/x-www-form-urlencoded; charset=UTF-8")
@@ -60,8 +71,6 @@ public class Application {
 				// comicService.download("https://cdn-msp.18comic.vip/media/photos/1121834/00007.webp");
 				// comicService.download("https://cdn-msp.18comic.vip/media/photos/1121834/00008.webp");
 				// comicService.download("https://cdn-msp.18comic.vip/media/photos/1121834/00009.webp");
-
-
 			// }
 		};
 

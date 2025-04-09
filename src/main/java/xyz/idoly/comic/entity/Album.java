@@ -1,11 +1,9 @@
 package xyz.idoly.comic.entity;
 
-import java.util.List;
-
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -14,17 +12,18 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-public class Comic {
+public class Album {
 
     @Id
     private Integer id;
 
     private String title;
 
-    private String cover;
+    private Integer photos;
 
     private Boolean status;
 
-    @OneToMany(mappedBy = "comic", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Album> albums;
+    @ManyToOne
+    @JoinColumn(name = "comic_id")
+    private Comic comic;
 }

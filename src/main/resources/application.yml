@@ -1,8 +1,22 @@
 spring:
   application:
     name: 18comic-assistant
+  main:
+    banner-mode: off
+  output:
+    ansi:
+      enabled: always
+  h2:
+    console.enabled: true # /h2-console
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate.format_sql: true
   datasource:
-    url: jdbc:h2:mem:testdb
+    url: jdbc:h2:file:./data;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
     driver-class-name: org.h2.Driver
     username: sa
     password:
@@ -10,13 +24,6 @@ spring:
     mode: manual
     host: 127.0.0.1
     port: 12334
-  upload:
-    strategy: local
-    url: /vertx-comic
-  comic:
-    host: https://18comic-rajang.cc
-    username: idolysfsdf
-    password: zxcvbnm159456
   ai:
     openai:
       api-key: sk-be0bee62e5364e0387c6511ceab4f3e2
