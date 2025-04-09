@@ -1,0 +1,9 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>jmcomic</title>
+</head>
+<body>
+<script type="text/javascript">document.location = "https://18comic-rajang.cc"</script>
+</body>
+</html>
