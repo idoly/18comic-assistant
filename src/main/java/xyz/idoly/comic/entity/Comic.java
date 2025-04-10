@@ -17,13 +17,9 @@ import lombok.NoArgsConstructor;
 public class Comic {
 
     @Id
-    private Integer id;
+    private int id;
 
     private String title;
-
-    private String cover;
-
-    private Boolean status;
 
     @OneToMany(mappedBy = "comic", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Album> albums;

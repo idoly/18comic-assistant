@@ -1,5 +1,6 @@
 package xyz.idoly.comic.entity;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
@@ -15,13 +16,21 @@ import lombok.NoArgsConstructor;
 public class Album {
 
     @Id
-    private Integer id;
+    private int id;
 
-    private String title;
+    // 第一张图片, 标记初始编号: 0 or 1
+    private int start;
 
-    private Integer photos;
+    // 已下载图片数量， end == total 时，设置 status = true
+    @Column(name = "`end`")
+    private int end;
 
-    private Boolean status;
+    //  初始状态                   首次下载             第二次下载             第三次下载
+    // start = 0，end = 0 -> start = 0，end = 1 -> start = 0，end = 2 -> start = 0，end = 2
+    // start = 0，end = 0 -> start = 1，end = 1 -> start = 1，end = 2 -> start = 1，end = 3
+    private int total;
+
+    private boolean status;
 
     @ManyToOne
     @JoinColumn(name = "comic_id")
