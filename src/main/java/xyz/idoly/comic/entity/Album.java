@@ -1,29 +1,96 @@
 package xyz.idoly.comic.entity;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OrderBy;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
 @Entity
 public class Album {
-
-    @Id
-    private Integer id;
-
-    private String title;
-
-    private Integer photos;
-
-    private Boolean status;
 
     @ManyToOne
     @JoinColumn(name = "comic_id")
     private Comic comic;
+
+    @Id
+    private String id;
+
+    private Integer index;
+
+    private Integer total;
+
+    @OneToMany(mappedBy = "album", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("index ASC")
+    private List<Photo> photos = new ArrayList<>();
+
+    public Album() {}
+
+    public Album(String id) {
+        this.id = id;
+    }
+
+    public Album(Comic comic, String id, Integer index, Integer total) {
+        this.comic = comic;
+        this.id = id;
+        this.index = index;
+        this.total = total;
+    }
+
+    public Album comic(Comic comic) {
+        setComic(comic);
+        return this;
+    }
+
+    public Comic getComic() {
+        return comic;
+    }
+
+    public void setComic(Comic comic) {
+        this.comic = comic;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public Integer getIndex() {
+        return index;
+    }
+
+    public void setIndex(Integer index) {
+        this.index = index;
+    }
+
+    public Integer getTotal() {
+        return total;
+    }
+
+    public void setTotal(Integer total) {
+        this.total = total;
+    }
+
+    public List<Photo> getPhotos() {
+        return photos;
+    }
+
+    public void setPhotos(List<Photo> photos) {
+        this.photos = photos;
+    }
+
+    @Override
+    public String toString() {
+        return "Album [id=" + id + ", index=" + index + ", photos=" + photos + "]";
+    }
+
 }

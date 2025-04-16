@@ -3,17 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="css/pico.css">
+    <link rel="stylesheet" href="pico.css">
     <link rel="icon" href="favicon.ico">
-    <title>all-comic</title>
+    <title>18comic-assistant</title>
 </head>
 <body>
-    <a href="1121834/index.html">comic-name</a>
-    <a href="1121834/index.html">comic-name</a>
-    <a href="1121834/index.html">comic-name</a>
-    <a href="1121834/index.html">comic-name</a>
-    <a href="1121834/index.html">comic-name</a>
-    <a href="1121834/index.html">comic-name</a>
-    <a href="1121834/index.html">comic-name</a>
+<#list comics as comic>
+    <a href="comic/${comic.id()}/index.html" title= ${comic.title()}" style="display: inline-flex; align-items: center; gap: 4px;">
+        <img src="${comic.cover()}" alt="">
+        <span>${comic.title()}</span>
+    </a>
+</#list>
 </body>
 </html>
