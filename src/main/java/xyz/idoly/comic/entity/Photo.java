@@ -20,6 +20,10 @@ public class Photo {
 
     private Integer index;
 
+    private Integer width;
+
+    private Integer height;
+
     private String origin;
 
     private Boolean status = false;
@@ -56,6 +60,22 @@ public class Photo {
         this.index = index;
     }
 
+    public Integer getWidth() {
+        return width;
+    }
+
+    public void setWidth(Integer width) {
+        this.width = width;
+    }
+
+    public Integer getHeight() {
+        return height;
+    }
+
+    public void setHeight(Integer height) {
+        this.height = height;
+    }
+
     public String getOrigin() {
         return origin;
     }
@@ -71,7 +91,7 @@ public class Photo {
     public void setStatus(Boolean status) {
         this.status = status;
     }
-
+    
     @Override
     public String toString() {
         return "Photo [index=" + index + ", status=" + status + "]";

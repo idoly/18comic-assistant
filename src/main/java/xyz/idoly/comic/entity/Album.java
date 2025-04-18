@@ -26,7 +26,7 @@ public class Album {
 
     private Integer total;
 
-    @OneToMany(mappedBy = "album", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "album", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("index ASC")
     private List<Photo> photos = new ArrayList<>();
 
@@ -93,4 +93,45 @@ public class Album {
         return "Album [id=" + id + ", index=" + index + ", photos=" + photos + "]";
     }
 
+    public static class WithoutPhotos {
+
+        private String id;
+        private Integer index;
+        private Integer total;
+
+        public WithoutPhotos(String id, Integer index, Integer total) {
+            this.id = id;
+            this.index = index;
+            this.total = total;
+        }
+
+        public String getId() {
+            return id;
+        }
+
+        public Integer getIndex() {
+            return index;
+        }
+
+        public Integer getTotal() {
+            return total;
+        }
+
+        public void setId(String id) {
+            this.id = id;
+        }
+
+        public void setIndex(Integer index) {
+            this.index = index;
+        }
+
+        public void setTotal(Integer total) {
+            this.total = total;
+        }
+    }
+
+
+    public static void main(String[] args) {
+        
+    }
 }

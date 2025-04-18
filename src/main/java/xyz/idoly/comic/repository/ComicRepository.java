@@ -10,6 +10,5 @@ import xyz.idoly.comic.entity.Comic;
 @Repository
 public interface ComicRepository extends JpaRepository<Comic, String> {
 
-    List<Comic.WithoutAlbum> findAllByOrderByIdAsc();
-
+    List<Comic.WithoutAlbums> findAllByOrderByIdAsc();
 }

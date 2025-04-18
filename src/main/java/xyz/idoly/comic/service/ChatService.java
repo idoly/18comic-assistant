@@ -16,7 +16,6 @@ import java.util.function.Function;
 import org.jsoup.nodes.Element;
 import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.ai.tool.annotation.Tool;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;

@@ -12,9 +12,9 @@ spring:
     database-platform: org.hibernate.dialect.H2Dialect
     hibernate:
       ddl-auto: update
-    # show-sql: true
-    # properties:
-    #   hibernate.format_sql: true
+    show-sql: true
+    properties:
+      hibernate.format_sql: true
   datasource:
     url: jdbc:h2:file:./data;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
     driver-class-name: org.h2.Driver
@@ -24,6 +24,19 @@ spring:
     mode: manual
     host: 127.0.0.1
     port: 12334
+  comic:
+    # strategy: weighted # 可选：round-robin、random、weighted
+    # list:
+    #   - url: https://18comic.org
+    #     weight: 5
+    #   - url: https://jmcomic-zzz.one
+    #     weight: 3
+    #   - url: http://18comic-daima.cc
+    #     weight: 2
+
+    # strategy: 
+    # urls: https://18comic.org, http://18comic-daima.cc
+    user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36 Edg/134.0.0.0
   ai:
     openai:
       api-key: sk-be0bee62e5364e0387c6511ceab4f3e2

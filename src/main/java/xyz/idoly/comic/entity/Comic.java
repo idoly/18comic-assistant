@@ -73,5 +73,5 @@ public class Comic {
         return "Comic [id=" + id + ", title=" + title + ", cover=" + cover + ", albums=" + albums + "]";
     }
 
-    public record WithoutAlbum(String id, String title, String cover) {}
+    public record WithoutAlbums(String id, String title, String cover) {}
 }
