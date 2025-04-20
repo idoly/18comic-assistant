@@ -8,7 +8,7 @@
     <title>${comic.title}-第${album.index?c}话</title>
 </head>
 <body class="w-full h-full bg-[#ececec] text-[#777]">
-    <div class="w-3/4 mx-auto mt-5 flex flex-col items-center">
+    <div class="md:w-3/4 sm:w-full mx-auto mt-5 flex flex-col items-center">
     <#list album.photos as photo>
         <img src="${photo.index?c}.png" width="${photo.width?c}" height ="${photo.height?c}" />
     </#list>
@@ -26,7 +26,7 @@
             </#if>
         </#list>
         <button
-            class="px-6 py-2 rounded-none shadow-inner border border-[#ccc]
+            class="px-3 py-2 rounded-none shadow-inner border border-[#ccc]
                 <#if prevEnabled?has_content>
                     text-white bg-[#888] hover:bg-[#666] transition-all duration-300 shadow-md
                 <#else>
@@ -34,11 +34,11 @@
                 </#if>"
             <#if !prevEnabled?has_content>disabled</#if>
             <#if prevEnabled?has_content>onclick="window.location.href='../${prevEnabled}/index.html';"</#if>>
-            ⬅ 上一话
+            ⬅
         </button>
 
         <button
-            class="px-6 py-2 rounded-none shadow-inner border border-[#ccc]
+            class="px-3 py-2 rounded-none shadow-inner border border-[#ccc]
                 <#if nextEnabled?has_content>
                     text-white bg-[#888] hover:bg-[#666] transition-all duration-300 shadow-md
                 <#else>
@@ -46,7 +46,7 @@
                 </#if>"
             <#if !nextEnabled?has_content>disabled</#if>
             <#if nextEnabled?has_content>onclick="window.location.href='../${nextEnabled}/index.html';"</#if>>
-            下一话 ➡
+            ➡
         </button>
     </div>
 
@@ -67,6 +67,19 @@
 
             lastY = y;
         });
+
+        // ✅ 添加这个立即执行的函数来初始化按钮显示状态
+        (function initButtonVisibility() {
+            const y = window.scrollY;
+            const atBottom = (y + window.innerHeight >= document.documentElement.scrollHeight - 2);
+            if (atBottom || y < lastY) {
+                nav.style.opacity = '1';
+                nav.style.pointerEvents = 'auto';
+            } else {
+                nav.style.opacity = '0';
+                nav.style.pointerEvents = 'none';
+            }
+        })();
     </script>
 </body>
 </html>

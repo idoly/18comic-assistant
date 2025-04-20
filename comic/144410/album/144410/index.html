@@ -8,7 +8,7 @@
     <title>把你玩坏掉(完結)-第0话</title>
 </head>
 <body class="w-full h-full bg-[#ececec] text-[#777]">
-    <div class="w-3/4 mx-auto mt-5 flex flex-col items-center">
+    <div class="md:w-3/4 mx-auto mt-5 sm:w-full flex flex-col items-center">
         <img src="0.png" width="300" height ="420" />
         <img src="1.png" width="720" height ="3000" />
         <img src="2.png" width="720" height ="3000" />
@@ -28,21 +28,21 @@
 
     <div id="nav-buttons" class="sticky bottom-5 mt-10 flex justify-center gap-6 transition-opacity duration-300 ease-in-out opacity-100 pointer-events-auto">
         <button
-            class="px-6 py-2 rounded-none shadow-inner border border-[#ccc]
+            class="px-3 py-2 rounded-none shadow-inner border border-[#ccc]
                     text-[#aaa] bg-[#e0e0e0] cursor-not-allowed
                 "
             disabled
             >
-            ⬅ 上一话
+            ⬅
         </button>
 
         <button
-            class="px-6 py-2 rounded-none shadow-inner border border-[#ccc]
+            class="px-3 py-2 rounded-none shadow-inner border border-[#ccc]
                     text-white bg-[#888] hover:bg-[#666] transition-all duration-300 shadow-md
 "
             
             onclick="window.location.href='../144411/index.html';">
-            下一话 ➡
+             ➡
         </button>
     </div>
 
@@ -63,6 +63,17 @@
 
             lastY = y;
         });
+        (function initButtonVisibility() {
+            const y = window.scrollY;
+            const atBottom = (y + window.innerHeight >= document.documentElement.scrollHeight - 2);
+            if (atBottom || y < lastY) {
+                nav.style.opacity = '1';
+                nav.style.pointerEvents = 'auto';
+            } else {
+                nav.style.opacity = '0';
+                nav.style.pointerEvents = 'none';
+            }
+        })();
     </script>
 </body>
 </html>
