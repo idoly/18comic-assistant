@@ -6,6 +6,7 @@ import java.net.InetSocketAddress;
 import java.net.ProxySelector;
 import java.net.http.HttpClient;
 import java.net.http.HttpClient.Redirect;
+import java.nio.file.Path;
 import java.time.Duration;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -21,6 +22,11 @@ import org.springframework.web.client.RestClient;
 @Configuration
 @ConfigurationProperties(prefix = "spring.proxy")
 public class AppConfig {
+
+    private static final String JMCOMIC = "https://jmcmomic.github.io";
+
+    private static final Path ROOT = Path.of(System.getProperty("user.dir"));
+
 
     @Bean
     public ProxySelector proxySelector() {

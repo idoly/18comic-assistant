@@ -3,16 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="pico.css">
-    <link rel="icon" href="favicon.ico">
-    <title>18comic-assistant</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="icon" href="../../favicon.ico">
+    <title>${comic.title}</title>
 </head>
-<body>
-<#list comics as comic>
-    <a href="comic/${comic.id()}/index.html" title= ${comic.title()}" style="display: inline-flex; align-items: center; gap: 4px;">
-        <img src="${comic.cover()}" alt="">
-        <span>${comic.title()}</span>
-    </a>
+<body class="w-full h-full bg-[#ececec] text-[#777]">
+<#list albums as album>
+    <a href="album/${album.id}/index.html">第${album.index?c}话</a>
 </#list>
 </body>
 </html>

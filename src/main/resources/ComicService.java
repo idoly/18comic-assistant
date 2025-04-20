@@ -18,6 +18,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.zip.ZipEntry;
@@ -54,6 +56,8 @@ public class ComicService {
 
     private static final Log log = LogFactory.getLog(ComicService.class);
 
+    private static final String JMCOMIC = "https://jmcmomic.github.io";
+
     private static final Path ROOT = Path.of(System.getProperty("user.dir"));
 
     private static final int[] PIECES = new int[]{2, 4, 6, 8, 10, 12, 14, 16, 18, 20};
@@ -75,11 +79,29 @@ public class ComicService {
     @Resource
     private RestClient restClient;
 
-    private int retries = 3;
+    private List<String> urls;
+
+    private int retries;
 
     @PostConstruct
     public void init() {
         try {
+            // 1. 
+            urls = new ArrayList<>();
+            String html = restClient.get().uri(JMCOMIC).retrieve().body(String.class);
+            Elements as = Jsoup.parse(html).selectXpath("//button/a");
+            for (Element a : as) {
+                html = restClient.get().uri(JMCOMIC + a.attr("href")).retrieve().body(String.class);
+                Pattern pattern = Pattern.compile("document\\.location\\s*=\\s*\"(https?://[^\"]+)\"");
+                Matcher matcher = pattern.matcher(html);
+                if (matcher.find()) {
+                    urls.add(matcher.group(1));
+                }
+            }
+
+            log.info("comic urls: " + urls);
+
+            // 2. 
             Path temp = ROOT.resolve("comic", "temp");
 
             Files.createDirectories(temp);
@@ -87,13 +109,16 @@ public class ComicService {
             ImageIO.setCacheDirectory(temp.toFile());
         } catch (Exception e) {
             log.error("comic-service init failed: {}", e);
-        } 
+        } finally {
+            retries = urls.size();
+        }
     }
 
     // 实现轮询，权重，随机
     private String getUrl() {
-        // return "http://18comic-daima.cc";
-        return "https://18comic.org";
+        return "http://18comic-daima.cc";
+        // return "https://jmcomic-zzz.one";
+        // return "https://18comic.org";
     }
 
     private String request(String path, String id) {
@@ -129,10 +154,10 @@ public class ComicService {
     
         Document doc = Jsoup.parse(html);
         String title = getTitle(doc);
-        List<String> covers = getCovers(doc);
+        String cover = getCover(doc);
         Elements albumElements = getAlbumElements(doc);
 
-        Comic comic = new Comic(id,title, covers);
+        Comic comic = new Comic(id,title, cover);
         if (albumElements.isEmpty()) {
             comic.getAlbums().add(new Album(id, 0));
         } else {
@@ -156,10 +181,10 @@ public class ComicService {
     
         Document doc = Jsoup.parse(html);
         String title = getTitle(doc);
-        List<String> covers = getCovers(doc);
+        String cover = getCover(doc);
         Elements albumElements = getAlbumElements(doc);
     
-        Comic comic = comicRepository.findById(id).orElseGet(() -> comicRepository.saveAndFlush(new Comic(id, title, covers)));
+        Comic comic = comicRepository.findById(id).orElseGet(() -> comicRepository.saveAndFlush(new Comic(id, title, cover)));
         Map<String, Album> idToAlbum = comic.getAlbums().stream().collect(Collectors.toMap(Album::getId, Function.identity()));
     
         List<Album> startToEnd = new ArrayList<>();
@@ -212,13 +237,10 @@ public class ComicService {
         if (comic == null) {
             log.warn("Comic [" + id + "] not found");
         } else {
-
-            for (int i = 0; i < comic.getCovers().size(); i++) download(comic.getId(), i, comic.getCovers().get(i));
-            templateIndex();
-
             List<Album.WithoutPhotos> albums = albumRepository.findAllByComicOrderByIndexAsc(comic);
-            templateComic(comic, albums);
 
+            templateIndex();
+            templateComic(comic, albums);
             comic.getAlbums().stream().forEach(album -> {
                 templateAlbum(comic, albums, album);
                 album.getPhotos().parallelStream().forEach(photo -> {
@@ -291,10 +313,10 @@ public class ComicService {
             if (html == null) return null;
             doc = Jsoup.parse(html);
             String title = getTitle(doc);
-            List<String> covers = getCovers(doc);
+            String cover = getCover(doc);
             Elements albumElements = getAlbumElements(doc);
         
-            Comic comic = comicRepository.findById(comicId).orElseGet(() -> comicRepository.saveAndFlush(new Comic(comicId, title, covers)));
+            Comic comic = comicRepository.findById(comicId).orElseGet(() -> comicRepository.saveAndFlush(new Comic(comicId, title, cover)));
 
             Album album = albumElements.stream()
                 .filter(albumElement -> dataAlbum.apply(albumElement).equals(id))
@@ -426,31 +448,6 @@ public class ComicService {
         return file;
     }
     
-    private void download(String comic, int index, String url) {
-        try {
-            BufferedImage image = null;
-
-            File file = path(comic, index + ".png").toFile();
-            if (file.exists()) return;
-            
-            ResponseEntity<byte[]> response = restClient.get()
-                .uri(URI.create(url))
-                .retrieve()
-                .toEntity(byte[].class);
-
-            byte[] body = response.getBody();
-            if (body == null || body.length == 0) throw new Exception("response body is empty");
-            
-            image = ImageIO.read(new ByteArrayInputStream(body));
-            if (image == null) throw new Exception("image decode failed");
-
-            boolean success = ImageIO.write(image, "png", file);
-            if (!success) throw new Exception("failed to write image to file");
-        } catch (Exception e) {
-            log.warn("[comic=" + comic + ", index=" + index + ", origin=" + url + "] " + e.getMessage());
-        } 
-    }
-
     private int pieces(int albumId, int photoIndex) {
         if (albumId < 220980) {
             return 1;
@@ -540,35 +537,16 @@ public class ComicService {
 
     private Path path(String... paths) {
         Path path = ROOT;
-
-        // 0 index.html
-        if (paths == null || paths.length == 0) {
-            return path.resolve("index.html");
-        };
-
-        // 1 comic/ path[0] / index.html
-        if (paths.length == 1) {
-            return path.resolve("comic").resolve(paths[0]).resolve("index.html");
-        }
-
-        // 2 comic/ path[0] / path[1]
-        // 2 comic/ path[0] / path[1] / index.html
-        if (paths.length == 2) {
-            path = path.resolve("comic").resolve(paths[0]);
-            if (paths[1].contains(".") && !paths[1].endsWith(".")) {
-                path = path.resolve(paths[1]);
-            } else {
-                path = path.resolve("album").resolve(paths[1]).resolve("index.html");
-            }
-        }
-
-        // 3 comic/ path[0] / album / path[1] / path[2]
-        if (paths.length == 3) {
-            return path.resolve("comic").resolve(paths[0])
-                    .resolve("album").resolve(paths[1])
-                    .resolve(paths[2]);
-        }
     
+        if (paths == null || paths.length == 0) return path.resolve("index.html");
+        if (paths.length == 1) return path.resolve("comic").resolve(paths[0]).resolve("index.html");
+        if (paths.length == 2) return path.resolve("comic").resolve(paths[0]).resolve("album").resolve(paths[1]).resolve("index.html");
+        if (paths.length == 3) return path.resolve("comic").resolve(paths[0]).resolve("album").resolve(paths[1]).resolve(paths[2]);
+
+        for (String part : paths) {
+            path = path.resolve(part);
+        }
+
         return path;
     }
 
@@ -576,18 +554,8 @@ public class ComicService {
         return doc.select("#book-name").text();
     }
 
-    private List<String> getCovers(Document doc) {
-        List<String> covers = new ArrayList<>();
-        
-        Elements coverElements = doc.select("#album_photo_cover > div.thumb-overlay > a:nth-child(2) > div > img");
-        coverElements.stream().map(coverElement -> src.apply(coverElement)).forEach(covers::add);
-        if (!covers.isEmpty()) {
-            String cover = covers.get(0);
-            int index = cover.lastIndexOf(".");
-            covers.addFirst(cover.substring(0, index) + "_3x4" + cover.substring(index));
-        }
-
-        return covers;
+    private String getCover(Document doc) {
+        return doc.select("#album_photo_cover > div.thumb-overlay > a:nth-child(2) > div > img").attr("src").split("\\?")[0];
     }
 
     private Elements getAlbumElements(Document doc) {
@@ -601,9 +569,6 @@ public class ComicService {
     private Optional<String> getComicId(Document doc) {
         return Optional.ofNullable(doc.select("#series_id").attr("value")).filter(s -> !s.isEmpty());
     }
-
-
-    private Function<Element, String> src = e -> e.attr("src").split("\\?")[0];
 
     private Function<Element, Integer> dataIndex = e -> Integer.valueOf(e.attr("data-index"));
 

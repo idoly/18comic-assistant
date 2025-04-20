@@ -3,6 +3,8 @@ package xyz.idoly.comic.entity;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -13,6 +15,7 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.OrderBy;
 
 @Entity
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class Album {
 
     @ManyToOne
@@ -32,8 +35,9 @@ public class Album {
 
     public Album() {}
 
-    public Album(String id) {
+    public Album(String id, Integer index) {
         this.id = id;
+        this.index = index;
     }
 
     public Album(Comic comic, String id, Integer index, Integer total) {

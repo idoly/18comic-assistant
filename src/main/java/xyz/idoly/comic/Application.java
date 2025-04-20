@@ -38,7 +38,7 @@ public class Application {
 		return args -> {
 
 			// // 漫画：多章节
-			comicService.downloadComic("144410");
+			// comicService.downloadComic("144410");
 			// comicService.zipComic("144410");
 			
 			// // 漫画：单章节

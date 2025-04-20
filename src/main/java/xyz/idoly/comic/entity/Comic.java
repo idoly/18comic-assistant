@@ -3,7 +3,13 @@ package xyz.idoly.comic.entity;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
@@ -11,6 +17,7 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.OrderBy;
 
 @Entity
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class Comic {
 
     @Id
@@ -18,7 +25,9 @@ public class Comic {
 
     private String title;
 
-    private String cover;
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(columnDefinition = "json")
+    private List<String> covers = new ArrayList<>();
 
     @OneToMany(mappedBy = "comic", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("index ASC")
@@ -26,14 +35,10 @@ public class Comic {
 
     public Comic() {}
 
-    public Comic(String id) {
-        this.id = id;
-    }
-
-    public Comic(String id, String title, String cover) {
+    public Comic(String id, String title, List<String> covers) {
         this.id = id;
         this.title = title;
-        this.cover = cover;
+        this.covers = covers;
     }
 
     public String getId() {
@@ -52,12 +57,12 @@ public class Comic {
         this.title = title;
     }
 
-    public String getCover() {
-        return cover;
+    public List<String> getCovers() {
+        return covers;
     }
 
-    public void setCover(String cover) {
-        this.cover = cover;
+    public void setCovers(List<String> covers) {
+        this.covers = covers;
     }
 
     public List<Album> getAlbums() {
@@ -70,8 +75,10 @@ public class Comic {
 
     @Override
     public String toString() {
-        return "Comic [id=" + id + ", title=" + title + ", cover=" + cover + ", albums=" + albums + "]";
+        return "Comic [id=" + id + ", title=" + title + ", cover=" + covers + ", albums=" + albums + "]";
     }
 
-    public record WithoutAlbums(String id, String title, String cover) {}
+    public record WithoutAlbums(String id, String title, List<String> covers) {}
+
+
 }
