@@ -1,21 +1,11 @@
 package xyz.idoly.comic;
 
-import java.util.List;
-
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
-import org.springframework.transaction.annotation.Transactional;
 
 import jakarta.annotation.Resource;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.EntityTransaction;
-import jakarta.persistence.PersistenceContext;
-import xyz.idoly.comic.entity.Album;
-import xyz.idoly.comic.entity.Comic;
 import xyz.idoly.comic.repository.AlbumRepository;
 import xyz.idoly.comic.repository.ComicRepository;
 import xyz.idoly.comic.service.ComicService;

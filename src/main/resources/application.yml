@@ -20,23 +20,12 @@ spring:
     driver-class-name: org.h2.Driver
     username: sa
     password:
-  proxy:
-    mode: manual
-    host: 127.0.0.1
-    port: 12334
   comic:
-    # strategy: weighted # 可选：round-robin、random、weighted
-    # list:
-    #   - url: https://18comic.org
-    #     weight: 5
-    #   - url: https://jmcomic-zzz.one
-    #     weight: 3
-    #   - url: http://18comic-daima.cc
-    #     weight: 2
-
-    # strategy: 
-    # urls: https://18comic.org, http://18comic-daima.cc
+    urls: https://18comic.org, "https://jmcomic-zzz.one", http://18comic-daima.cc
     user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36 Edg/134.0.0.0
+    proxy:
+      host: 127.0.0.1
+      port: 12334
   ai:
     openai:
       api-key: sk-be0bee62e5364e0387c6511ceab4f3e2

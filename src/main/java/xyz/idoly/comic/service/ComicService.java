@@ -9,7 +9,6 @@ import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -17,7 +16,10 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.zip.ZipEntry;
@@ -32,7 +34,6 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.ai.tool.annotation.Tool;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 import org.springframework.web.client.RestClient;
@@ -42,6 +43,7 @@ import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
+import xyz.idoly.comic.config.AppConfig;
 import xyz.idoly.comic.entity.Album;
 import xyz.idoly.comic.entity.Comic;
 import xyz.idoly.comic.entity.Photo;
@@ -54,11 +56,14 @@ public class ComicService {
 
     private static final Log log = LogFactory.getLog(ComicService.class);
 
-    private static final Path ROOT = Path.of(System.getProperty("user.dir"));
+    private static final String JMCOMIC = "https://jmcmomic.github.io";
 
     private static final int[] PIECES = new int[]{2, 4, 6, 8, 10, 12, 14, 16, 18, 20};
 
-    private static final String USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36 Edg/134.0.0.0";
+    private static final AtomicInteger urlIndex = new AtomicInteger(0);
+
+    @Resource
+    private AppConfig config;
 
     @Resource
     private Configuration configuration;
@@ -75,37 +80,72 @@ public class ComicService {
     @Resource
     private RestClient restClient;
 
-    private int retries = 3;
+    private int retries;
+
+    private Path ROOT;
 
     @PostConstruct
     public void init() {
         try {
-            Path temp = ROOT.resolve("comic", "temp");
+            // 1.
+            ROOT = Path.of(config.getPath());
 
-            Files.createDirectories(temp);
-            ImageIO.setUseCache(true);
-            ImageIO.setCacheDirectory(temp.toFile());
+            // 2.
+            if (config.getUrls() == null || config.getUrls().isEmpty()) {
+                config.setUrls(fetchUrls());
+            }
+
+            // 3.
+            createTempDir();
+
         } catch (Exception e) {
             log.error("comic-service init failed: {}", e);
-        } 
+        } finally {
+            retries = config.getUrls().size();
+        }
     }
 
-    // 实现轮询，权重，随机
+    private List<String> fetchUrls() throws IOException {
+        List<String> urls = new ArrayList<>();
+        String html = restClient.get().uri(JMCOMIC).retrieve().body(String.class);
+        Elements as = Jsoup.parse(html).selectXpath("//button/a");
+        for (Element a : as) {
+            html = restClient.get().uri(JMCOMIC + a.attr("href")).retrieve().body(String.class);
+            Pattern pattern = Pattern.compile("document\\.location\\s*=\\s*\"(https?://[^\"]+)\"");
+            Matcher matcher = pattern.matcher(html);
+            if (matcher.find()) {
+                urls.add(matcher.group(1));
+            }
+        }
+        log.info("comic urls: " + urls);
+
+        return urls;
+    }
+
+    private void createTempDir() throws IOException {
+        Path temp = ROOT.resolve("comic", "temp");
+        Files.createDirectories(temp);
+        ImageIO.setUseCache(true);
+        ImageIO.setCacheDirectory(temp.toFile());
+    }
+
     private String getUrl() {
-        // return "http://18comic-daima.cc";
-        return "https://18comic.org";
+        List<String> urls = config.getUrls();
+        if (urls == null || urls.isEmpty()) {
+            throw new IllegalStateException("URL list is empty, did you forget to fetch URLs?");
+        }
+        int index = Math.abs(urlIndex.getAndIncrement() % urls.size());
+        return urls.get(index);
+    }
+    
+    private <T> T  request(String path, String id, Class<T> responseType) {
+        return request(getUrl() + "/" + path + "/" + id, responseType);
     }
 
-    private String request(String path, String id) {
-        String uri = getUrl() + "/" + path + "/" + id;
+    private <T> T  request(String uri, Class<T> responseType) {
         for (int retry = 0; retry < retries; retry++) {
             try {
-                return restClient.get()
-                        .uri(uri)
-                        .header("User-Agent", USER_AGENT)
-                        .header("Referer", getUrl())
-                        .retrieve()
-                        .body(String.class);
+                return restClient.get().uri(uri).retrieve().body(responseType);
             } catch (Exception e) {
                 log.warn("Request failed for uri: " + uri + ", retrying " + (retry + 1) + "/" + retries + ", e: " + e.getMessage());
                 try {
@@ -121,10 +161,9 @@ public class ComicService {
         return null;
     }
 
-
     @Tool(description = "根据 comic ID 获取 Comic 对象")
     public Comic search(String id) {
-        String html = request("album", id);
+        String html = request("album", id, String.class);
         if (html == null) return null;
     
         Document doc = Jsoup.parse(html);
@@ -151,7 +190,7 @@ public class ComicService {
     }
 
     private Comic getComicById(String id, int start, int end) {
-        String html = request("album", id);
+        String html = request("album", id, String.class);
         if (html == null) return null;
     
         Document doc = Jsoup.parse(html);
@@ -187,7 +226,7 @@ public class ComicService {
     }
 
     private Album getAlbumById(Comic comic, String id, int index) {
-        String html = request("photo", id);
+        String html = request("photo", id, String.class);
         if (html == null) return null;
     
         Document doc = Jsoup.parse(html);
@@ -281,13 +320,13 @@ public class ComicService {
 
     private Album getAlbumById(String id)  {
         return albumRepository.findById(id).orElseGet(() -> {
-            String html = request("photo", id);
+            String html = request("photo", id, String.class);
             if (html == null) return null;
             Document doc = Jsoup.parse(html);
             String comicId = getComicId(doc).orElse(id);
             Elements photoElements = getPhotoElements(doc);
 
-            html = request("album", comicId);
+            html = request("album", comicId, String.class);
             if (html == null) return null;
             doc = Jsoup.parse(html);
             String title = getTitle(doc);
@@ -389,19 +428,13 @@ public class ComicService {
         Integer photoIndex = photo.getIndex();
         String photoOrigin = photo.getOrigin();
 
-        File file = path(comicId, albumId, photoIndex + ".png").toFile();
+        File file = file(comicId, albumId, photoIndex + ".png");
         try {
-
             BufferedImage image = null;
             if (file.exists()) {
                 image = ImageIO.read(new FileInputStream(file));
             } else {
-                ResponseEntity<byte[]> response = restClient.get()
-                .uri(URI.create(photoOrigin))
-                .retrieve()
-                .toEntity(byte[].class);
-
-                byte[] body = response.getBody();
+                byte[] body = request(photoOrigin, byte[].class);
                 if (body == null || body.length == 0) throw new Exception("response body is empty");
                 
                 image = ImageIO.read(new ByteArrayInputStream(body));
@@ -430,15 +463,10 @@ public class ComicService {
         try {
             BufferedImage image = null;
 
-            File file = path(comic, index + ".png").toFile();
+            File file = file(comic, index + ".png");
             if (file.exists()) return;
-            
-            ResponseEntity<byte[]> response = restClient.get()
-                .uri(URI.create(url))
-                .retrieve()
-                .toEntity(byte[].class);
 
-            byte[] body = response.getBody();
+            byte[] body = request(url, byte[].class);;
             if (body == null || body.length == 0) throw new Exception("response body is empty");
             
             image = ImageIO.read(new ByteArrayInputStream(body));
@@ -526,29 +554,28 @@ public class ComicService {
     }
 
     private void template(String name, Map<String, Object> params, String... paths) {
-        Path path = path(paths);
+        File file = file(paths);
         try {
-            Files.createDirectories(path.getParent());
             Template template = configuration.getTemplate(name);
-            try (FileWriter writer = new FileWriter(path.toFile())) {
+            try (FileWriter writer = new FileWriter(file)) {
                 template.process(params, writer);
             }
         } catch (IOException | TemplateException e) {
-            log.error("Failed to render template [" + name + "] to ["+ path +"]", e);
+            log.error("Failed to render template [" + name + "] to ["+ file.getName() +"]", e);
         }
     }
 
-    private Path path(String... paths) {
+    private File file(String... paths) {
         Path path = ROOT;
 
         // 0 index.html
         if (paths == null || paths.length == 0) {
-            return path.resolve("index.html");
+            path =  path.resolve("index.html");
         };
 
         // 1 comic/ path[0] / index.html
         if (paths.length == 1) {
-            return path.resolve("comic").resolve(paths[0]).resolve("index.html");
+            path =  path.resolve("comic").resolve(paths[0]).resolve("index.html");
         }
 
         // 2 comic/ path[0] / path[1]
@@ -564,12 +591,19 @@ public class ComicService {
 
         // 3 comic/ path[0] / album / path[1] / path[2]
         if (paths.length == 3) {
-            return path.resolve("comic").resolve(paths[0])
+            path =  path.resolve("comic").resolve(paths[0])
                     .resolve("album").resolve(paths[1])
                     .resolve(paths[2]);
         }
+
+        try {
+            File parent = path.getParent().toFile();
+            if (!parent.exists()) Files.createDirectories(path.getParent());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     
-        return path;
+        return path.toFile();
     }
 
     private String getTitle(Document doc) {
@@ -601,7 +635,6 @@ public class ComicService {
     private Optional<String> getComicId(Document doc) {
         return Optional.ofNullable(doc.select("#series_id").attr("value")).filter(s -> !s.isEmpty());
     }
-
 
     private Function<Element, String> src = e -> e.attr("src").split("\\?")[0];
 
