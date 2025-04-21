@@ -1,67 +1,80 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
+    <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <link rel="icon" href="../../../../favicon.ico">
     <title>把你玩坏掉(完結)-第4话</title>
 </head>
 <body class="w-full h-full bg-[#ececec] text-[#777]">
-    <div class="w-3/4 mx-auto mt-5 flex flex-col items-center">
-        <img src="0.png" width="720" height ="3000" />
-        <img src="1.png" width="720" height ="3000" />
-        <img src="2.png" width="720" height ="3033" />
-        <img src="3.png" width="720" height ="3000" />
-        <img src="4.png" width="720" height ="3034" />
-        <img src="5.png" width="720" height ="3000" />
-        <img src="6.png" width="720" height ="3000" />
-        <img src="7.png" width="720" height ="3000" />
-        <img src="8.png" width="720" height ="3000" />
-        <img src="9.png" width="720" height ="2933" />
-        <img src="10.png" width="720" height ="3000" />
-        <img src="11.png" width="720" height ="3000" />
-        <img src="12.png" width="720" height ="2793" />
+    <div class="md:w-3/4 sm:w-full mx-auto mt-5 flex flex-col items-center">
+        <img src="0.png" width="720" height ="3000" alt="0.png" />
+        <img src="1.png" width="720" height ="3000" alt="1.png" />
+        <img src="2.png" width="720" height ="3033" alt="2.png" />
+        <img src="3.png" width="720" height ="3000" alt="3.png" />
+        <img src="4.png" width="720" height ="3034" alt="4.png" />
+        <img src="5.png" width="720" height ="3000" alt="5.png" />
+        <img src="6.png" width="720" height ="3000" alt="6.png" />
+        <img src="7.png" width="720" height ="3000" alt="7.png" />
+        <img src="8.png" width="720" height ="3000" alt="8.png" />
+        <img src="9.png" width="720" height ="2933" alt="9.png" />
+        <img src="10.png" width="720" height ="3000" alt="10.png" />
+        <img src="11.png" width="720" height ="3000" alt="11.png" />
+        <img src="12.png" width="720" height ="2793" alt="12.png" />
     </div>
-
-
-    <div id="nav-buttons" class="sticky bottom-5 mt-10 flex justify-center gap-6 transition-opacity duration-300 ease-in-out opacity-100 pointer-events-auto">
-        <button
-            class="px-6 py-2 rounded-none shadow-inner border border-[#ccc]
-                    text-white bg-[#888] hover:bg-[#666] transition-all duration-300 shadow-md
-"
-            
-            onclick="window.location.href='../144413/index.html';">
-            ⬅ 上一话
+    <div id="nav-buttons" class="sticky bottom-5 mt-10 flex flex-col items-center gap-2 transition-opacity duration-300 ease-in-out opacity-100 pointer-events-auto">
+        <button aria-label="返回顶部" tabindex="-1" class="px-3 py-2 rounded shadow-inner border border-[#ccc] bg-[#d6d6d6] text-[#666] hover:bg-[#c8c8c8] hover:text-[#444] transition-all duration-300 shadow-md"
+            onclick="window.scrollTo({ top: 0, behavior: 'smooth' });" >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M5 15l7-7 7 7" />
+            </svg>
         </button>
 
-        <button
-            class="px-6 py-2 rounded-none shadow-inner border border-[#ccc]
-                    text-white bg-[#888] hover:bg-[#666] transition-all duration-300 shadow-md
-"
-            
-            onclick="window.location.href='../144415/index.html';">
-            下一话 ➡
-        </button>
+        <div class="flex flex-row gap-4 mt-2">
+            <button aria-label="返回主页" tabindex="-1"  class="px-3 py-2 rounded shadow-inner border border-[#ccc] 
+                bg-[#ccc] text-[#555] hover:bg-[#bbb] hover:text-[#333] transition-all duration-300 shadow-md
+                "
+                onclick="window.location.href='../144413/index.html';"
+                >
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+                </svg>
+            </button>
+            <button aria-label="上一话" tabindex="-1" class="px-3 py-2 rounded-none shadow-inner border border-[#ccc] bg-[#d6d6d6] text-[#666] hover:bg-[#c8c8c8] hover:text-[#444] transition-all duration-300 shadow-md"
+                onclick="window.location.href='../../index.html';">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l9-9 9 9M4 10v10a1 1 0 001 1h4m10-11v10a1 1 0 01-1 1h-4m-6 0h6" />
+                </svg>
+            </button>
+            <button aria-label="下一话" tabindex="-1" class="px-3 py-2 rounded shadow-inner border border-[#ccc] 
+                bg-[#ccc] text-[#555] hover:bg-[#bbb] hover:text-[#333] transition-all duration-300 shadow-md
+                "
+                onclick="window.location.href='../144415/index.html';"
+                >
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                </svg>
+            </button>
+        </div>
     </div>
-
     <script>
         const nav = document.getElementById('nav-buttons');
         let lastY = window.scrollY;
-        window.addEventListener('scroll', () => {
-            const y = window.scrollY;
-            const atBottom = (y + window.innerHeight >= document.documentElement.scrollHeight - 2);
 
-            if (atBottom || y < lastY) {
-                nav.style.opacity = '1';
-                nav.style.pointerEvents = 'auto';
-            } else {
-                nav.style.opacity = '0';
-                nav.style.pointerEvents = 'none';
-            }
+        const updateNavVisibility = () => {
+            const y = window.scrollY;
+            const atBottom = y + window.innerHeight >= document.documentElement.scrollHeight - 2;
+            const shouldShow = atBottom || y < lastY;
+
+            nav.style.opacity = shouldShow ? '1' : '0';
+            nav.style.pointerEvents = shouldShow ? 'auto' : 'none';
 
             lastY = y;
-        });
+        };
+
+        window.addEventListener('scroll', updateNavVisibility);
+        updateNavVisibility();
     </script>
 </body>
 </html>

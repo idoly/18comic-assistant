@@ -27,7 +27,6 @@ public class AppConfig {
 
     private static final Path ROOT = Path.of(System.getProperty("user.dir"));
 
-
     @Bean
     public ProxySelector proxySelector() {
         return switch (getMode()) {
