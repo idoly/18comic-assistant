@@ -21,10 +21,9 @@ spring:
     username: sa
     password:
   comic:
-    # username: idolysfsdf
-    # password: zxcvbnm159456
-    # 
-    urls: https://jmcomic-zzz.one, http://18comic-daima.cc,  https://18comic.org
+    username: idolysfsdf
+    password: zxcvbnm159456
+    urls: http://18comic-daima.cc, https://18comic.org, https://jmcomic-zzz.one
     user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36 Edg/134.0.0.0
     proxy:
       host: 127.0.0.1

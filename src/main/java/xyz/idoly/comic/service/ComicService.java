@@ -293,14 +293,7 @@ public class ComicService {
             templateComic(comic, albums);
 
             comic.getAlbums().stream().forEach(album -> {
-                album.getPhotos().parallelStream().forEach(photo -> {
-                    try {
-                        download(photo);
-                    } catch (Exception e) {
-                        // Exception already logged inside download(photo)
-                    }
-                });
-
+                album.getPhotos().parallelStream().forEach(photo -> download(photo));
                 templateAlbum(comic, albums, album);
                 log.info("Album [" + album.getId() + "] has been downloaded successfully.");
             });

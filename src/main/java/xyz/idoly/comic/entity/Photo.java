@@ -20,9 +20,9 @@ public class Photo {
 
     private Integer index;
 
-    private Integer width;
+    private Integer width = 0;
 
-    private Integer height;
+    private Integer height = 0;
 
     private String origin;
 
