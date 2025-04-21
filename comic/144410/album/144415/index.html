@@ -64,19 +64,39 @@
     <script>
         const nav = document.getElementById('nav-buttons');
         let lastY = window.scrollY;
+        let ticking = false;
 
-        const updateNavVisibility = () => {
+        function updateNavVisibility() {
             const y = window.scrollY;
-            const atBottom = y + window.innerHeight >= document.documentElement.scrollHeight - 2;
+            const totalHeight = Math.max(
+                document.body.scrollHeight,
+                document.documentElement.scrollHeight
+            );
+            const viewportHeight = window.innerHeight;
+
+            // 提前一点判定“底部”，兼容 iOS 隐藏地址栏时 innerHeight 的误差
+            const atBottom = y + viewportHeight >= totalHeight - 10;
+
+            // 判断是否向上滚动或到底部
             const shouldShow = atBottom || y < lastY;
 
             nav.style.opacity = shouldShow ? '1' : '0';
             nav.style.pointerEvents = shouldShow ? 'auto' : 'none';
 
             lastY = y;
-        };
+        }
 
-        window.addEventListener('scroll', updateNavVisibility);
+        window.addEventListener('scroll', () => {
+            if (!ticking) {
+                window.requestAnimationFrame(() => {
+                    updateNavVisibility();
+                    ticking = false;
+                });
+                ticking = true;
+            }
+        });
+
+        // 初次进入页面执行一次
         updateNavVisibility();
     </script>
 </body>
