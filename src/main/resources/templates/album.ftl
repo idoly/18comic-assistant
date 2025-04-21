@@ -8,9 +8,9 @@
     <title>${comic.title}-第${album.index?c}话</title>
 </head>
 <body class="w-full h-full bg-[#ececec] text-[#777]">
-    <div class="md:w-3/4 sm:w-full mx-auto mt-5 flex flex-col items-center">
+    <div class="md:w-3/4 sm:w-full mx-auto flex flex-col items-center">
     <#list album.photos as photo>
-        <img src="${photo.index?c}.png" width="${photo.width?c}" height ="${photo.height?c}" alt="${photo.index?c}.png" />
+        <img class="border-x-1 border-white" src="${photo.index?c}.png" width="${photo.width?c}" height ="${photo.height?c}" alt="${photo.index?c}.png" />
     </#list>
     </div>
     <div id="nav-buttons" class="sticky bottom-5 mt-10 flex flex-col items-center gap-2 transition-opacity duration-300 ease-in-out opacity-100 pointer-events-auto">
