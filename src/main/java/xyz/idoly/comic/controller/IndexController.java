@@ -28,10 +28,9 @@ public class IndexController {
     //         .content();
     // }
 
-
-    @GetMapping("/query")
-    public Comic queryComicById(@RequestParam String id) {
-        return comicService.search(id);
-    }
+    // @GetMapping("/query")
+    // public Comic queryComicById(@RequestParam String id) {
+    //     return comicService.search(id);
+    // }
 
 }

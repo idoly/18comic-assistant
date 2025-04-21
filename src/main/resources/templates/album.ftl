@@ -8,9 +8,9 @@
     <title>${comic.title}-第${album.index?c}话</title>
 </head>
 <body class="w-full h-full bg-[#ececec] text-[#777]">
-    <div class="md:w-3/4 sm:w-full mx-auto flex flex-col items-center">
+    <div class="md:w-3/4 sm:w-full mx-auto flex flex-col items-center border-x-1 border-white">
     <#list album.photos as photo>
-        <img class="border-x-1 border-white" src="${photo.index?c}.png" width="${photo.width?c}" height ="${photo.height?c}" alt="${photo.index?c}.png" />
+        <img src="${photo.index?c}.png" width="${photo.width?c}" height ="${photo.height?c}" alt="${photo.index?c}.png" />
     </#list>
     </div>
     <div id="nav-buttons" class="sticky bottom-5 mt-10 flex flex-col items-center gap-2 transition-opacity duration-300 ease-in-out opacity-100 pointer-events-auto">
@@ -65,18 +65,14 @@
 
         function updateNavVisibility() {
             const y = window.scrollY;
+            const viewportHeight = window.innerHeight;
             const totalHeight = Math.max(
                 document.body.scrollHeight,
                 document.documentElement.scrollHeight
             );
-            const viewportHeight = window.innerHeight;
 
-            // 提前一点判定“底部”，兼容 iOS 隐藏地址栏时 innerHeight 的误差
             const atBottom = y + viewportHeight >= totalHeight - 10;
-
-            // 判断是否向上滚动或到底部
             const shouldShow = atBottom || y < lastY;
-
             nav.style.opacity = shouldShow ? '1' : '0';
             nav.style.pointerEvents = shouldShow ? 'auto' : 'none';
 
@@ -93,7 +89,6 @@
             }
         });
 
-        // 初次进入页面执行一次
         updateNavVisibility();
     </script>
 </body>

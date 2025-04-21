@@ -30,7 +30,7 @@ public class Photo {
 
     public Photo() {}
 
-    public Photo(Album album, int index, String origin) {
+    public Photo(Album album, Integer index, String origin) {
         this.album = album;
         this.index = index;
         this.origin = origin;

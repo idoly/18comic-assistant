@@ -29,11 +29,13 @@ import javax.imageio.ImageIO;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.util.Strings;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.ai.tool.annotation.Tool;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 import org.springframework.web.client.RestClient;
@@ -80,9 +82,11 @@ public class ComicService {
     @Resource
     private RestClient restClient;
 
-    private int retries;
+    private int retries = 3;
 
     private Path ROOT;
+
+    private String url;
 
     @PostConstruct
     public void init() {
@@ -91,13 +95,20 @@ public class ComicService {
             ROOT = Path.of(config.getPath());
 
             // 2.
-            if (config.getUrls() == null || config.getUrls().isEmpty()) {
-                config.setUrls(fetchUrls());
-            }
-
-            // 3.
             createTempDir();
 
+            // 3. 
+            if (config.getUrls().isEmpty()) {
+                List<String> urls = fetchUrls();
+                config.setUrls(urls);
+            }
+
+            log.info("comic urls: " + config.getUrls());
+
+            // 4.
+            if (Strings.isNotBlank(config.getUsername()) && Strings.isNotBlank(config.getPassword())) {
+                login(config.getUsername(), config.getPassword());
+            } 
         } catch (Exception e) {
             log.error("comic-service init failed: {}", e);
         } finally {
@@ -105,21 +116,20 @@ public class ComicService {
         }
     }
 
-    private List<String> fetchUrls() throws IOException {
-        List<String> urls = new ArrayList<>();
-        String html = restClient.get().uri(JMCOMIC).retrieve().body(String.class);
-        Elements as = Jsoup.parse(html).selectXpath("//button/a");
-        for (Element a : as) {
-            html = restClient.get().uri(JMCOMIC + a.attr("href")).retrieve().body(String.class);
-            Pattern pattern = Pattern.compile("document\\.location\\s*=\\s*\"(https?://[^\"]+)\"");
-            Matcher matcher = pattern.matcher(html);
-            if (matcher.find()) {
-                urls.add(matcher.group(1));
-            }
-        }
-        log.info("comic urls: " + urls);
+    private void setUrl(String url) {
+        this.url = url;
+    }
 
-        return urls;
+    private String getUrl() {
+        if (url == null) {
+            List<String> urls = config.getUrls();
+            if (urls == null || urls.isEmpty()) {
+                throw new IllegalStateException("URL list is empty, did you forget to fetch URLs?");
+            }
+            return urls.get(urlIndex.getAndIncrement() % urls.size());
+        } 
+
+        return url;
     }
 
     private void createTempDir() throws IOException {
@@ -129,23 +139,75 @@ public class ComicService {
         ImageIO.setCacheDirectory(temp.toFile());
     }
 
-    private String getUrl() {
-        List<String> urls = config.getUrls();
-        if (urls == null || urls.isEmpty()) {
-            throw new IllegalStateException("URL list is empty, did you forget to fetch URLs?");
-        }
-        int index = Math.abs(urlIndex.getAndIncrement() % urls.size());
-        return urls.get(index);
-    }
-    
-    private <T> T  request(String path, String id, Class<T> responseType) {
-        return request(getUrl() + "/" + path + "/" + id, responseType);
+    private List<String> fetchUrls() throws IOException {
+        String html = request(JMCOMIC, String.class);
+        if (html == null) return new ArrayList<>();
+
+        List<String> urls = new ArrayList<>();
+        Elements urlElements = Jsoup.parse(html).selectXpath("//button/a");
+        urlElements.stream().forEach(urlElement -> {
+            String urlHtml = request(JMCOMIC + urlElement.attr("href"), String.class);
+            Pattern pattern = Pattern.compile("document\\.location\\s*=\\s*\"(https?://[^\"]+)\"");
+            Matcher matcher = pattern.matcher(urlHtml);
+            if (matcher.find()) {
+                urls.add(matcher.group(1));
+            }
+        });
+
+        return urls;
     }
 
-    private <T> T  request(String uri, Class<T> responseType) {
+    private void login(String username, String password) {
+        String url = getUrl();
+        try {
+            ResponseEntity<String> response = restClient.post()
+                .uri(url + "/login")
+                .header("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8")
+                .body("username=" + username + "&password=" + password + "&id_remember=on&login_remember=on&submit_login=1")
+                .retrieve()
+                .toEntity(String.class);
+
+            if (!response.getStatusCode().is2xxSuccessful()) throw new Exception(response.getBody());
+            
+            setUrl(url);
+            downloadFavorites(username);
+
+            log.info("Login succeeded for user[" + username + "] to " + url);
+        } catch (Exception e) {
+            log.error("Login failed for user[" + username + "] to " + url + ": " + e.getMessage());
+        }
+    }
+
+    private void downloadFavorites(String username) {
+        String html = requestFavorites(username);
+        if (html == null) return;
+
+        Document doc = Jsoup.parse(html);
+        Elements comicElements = getComicElements(doc);
+        comicElements.stream().map(comicElement -> Id.apply(comicElement)).forEach(this::downloadComic);
+    }
+
+    private String requestFavorites(String username) {
+        return request(getUrl() + "/user/" + username + "/favorite/albums", String.class);
+    }
+
+    private String requestComic(String id) {
+        return request(getUrl() + "/album/" + id, String.class);
+    }
+
+    private String requestAlbum(String id) {
+        return request(getUrl() + "/photo/" + id, String.class);
+    }
+    
+    private <T> T request(String uri, Class<T> responseType) {
         for (int retry = 0; retry < retries; retry++) {
             try {
-                return restClient.get().uri(uri).retrieve().body(responseType);
+                ResponseEntity<T> response = restClient.get().uri(uri).retrieve().toEntity(responseType);
+                if (!response.getStatusCode().is2xxSuccessful()) {
+                    throw new Exception(response.getStatusCode().toString());
+                }
+
+                return response.getBody();
             } catch (Exception e) {
                 log.warn("Request failed for uri: " + uri + ", retrying " + (retry + 1) + "/" + retries + ", e: " + e.getMessage());
                 try {
@@ -161,36 +223,8 @@ public class ComicService {
         return null;
     }
 
-    @Tool(description = "根据 comic ID 获取 Comic 对象")
-    public Comic search(String id) {
-        String html = request("album", id, String.class);
-        if (html == null) return null;
-    
-        Document doc = Jsoup.parse(html);
-        String title = getTitle(doc);
-        List<String> covers = getCovers(doc);
-        Elements albumElements = getAlbumElements(doc);
-
-        Comic comic = new Comic(id,title, covers);
-        if (albumElements.isEmpty()) {
-            comic.getAlbums().add(new Album(id, 0));
-        } else {
-            albumElements.stream()
-                .map(albumElement -> new Album(dataAlbum.apply(albumElement), dataIndex.apply(albumElement)))
-                .sorted(Comparator.comparing(Album::getIndex))
-                .forEachOrdered(comic.getAlbums()::add);
-        }
-        
-        return comic;
-    }
-
-    @Tool(description = "根据 comic ID 更新 Comic 对象")
-    public void updateComicById(String id) {
-        getComicById(id, 0, Integer.MAX_VALUE);
-    }
-
     private Comic getComicById(String id, int start, int end) {
-        String html = request("album", id, String.class);
+        String html = requestComic(id);
         if (html == null) return null;
     
         Document doc = Jsoup.parse(html);
@@ -226,19 +260,19 @@ public class ComicService {
     }
 
     private Album getAlbumById(Comic comic, String id, int index) {
-        String html = request("photo", id, String.class);
-        if (html == null) return null;
-    
+        String html = requestAlbum(id);
+        if (html == null) return new Album(comic, id, index);
+
         Document doc = Jsoup.parse(html);
         Elements photoElements = getPhotoElements(doc);
 
         Album album = new Album(comic, id, index, photoElements.size());
 
         photoElements.stream()
-            .map(photo -> new Photo(album, dataPage.apply(photo), dataOriginal.apply(photo)))
-            .sorted(Comparator.comparing(Photo::getIndex))
-            .forEachOrdered(album.getPhotos()::add);
-    
+        .map(photo -> new Photo(album, dataPage.apply(photo), dataOriginal.apply(photo)))
+        .sorted(Comparator.comparing(Photo::getIndex))
+        .forEachOrdered(album.getPhotos()::add);
+
         return albumRepository.saveAndFlush(album);
     }
     
@@ -259,7 +293,6 @@ public class ComicService {
             templateComic(comic, albums);
 
             comic.getAlbums().stream().forEach(album -> {
-                templateAlbum(comic, albums, album);
                 album.getPhotos().parallelStream().forEach(photo -> {
                     try {
                         download(photo);
@@ -268,6 +301,7 @@ public class ComicService {
                     }
                 });
 
+                templateAlbum(comic, albums, album);
                 log.info("Album [" + album.getId() + "] has been downloaded successfully.");
             });
 
@@ -320,14 +354,16 @@ public class ComicService {
 
     private Album getAlbumById(String id)  {
         return albumRepository.findById(id).orElseGet(() -> {
-            String html = request("photo", id, String.class);
+            String html = requestAlbum(id);
             if (html == null) return null;
+
             Document doc = Jsoup.parse(html);
             String comicId = getComicId(doc).orElse(id);
             Elements photoElements = getPhotoElements(doc);
 
-            html = request("album", comicId, String.class);
+            html = requestComic(id);
             if (html == null) return null;
+
             doc = Jsoup.parse(html);
             String title = getTitle(doc);
             List<String> covers = getCovers(doc);
@@ -365,14 +401,11 @@ public class ComicService {
                 log.error("No album found for ID: " + id);
             } else {
                 albums.add(album);
-
+                album.getPhotos().parallelStream().forEach(this::download);
                 Comic comic = album.getComic();
-
                 templateIndex();
                 templateComic(comic, null);
                 templateAlbum(comic, null, album);
-                album.getPhotos().parallelStream().forEach(this::download);
-
                 log.info("Comic: [" + comic.getId() + "] , Album: [" + id + "] has been downloaded successfully.");
             }
         }
@@ -624,6 +657,14 @@ public class ComicService {
         return covers;
     }
 
+    private Optional<String> getComicId(Document doc) {
+        return Optional.ofNullable(doc.select("#series_id").attr("value")).filter(s -> !s.isEmpty());
+    }
+
+    private Elements getComicElements(Document doc) {
+        return doc.select("[id^=favorites_album_]");
+    }
+
     private Elements getAlbumElements(Document doc) {
         return doc.select("#episode-block > div > div > ul > a");
     }
@@ -632,18 +673,40 @@ public class ComicService {
         return doc.select("img[id^=album_photo_]");
     }
 
-    private Optional<String> getComicId(Document doc) {
-        return Optional.ofNullable(doc.select("#series_id").attr("value")).filter(s -> !s.isEmpty());
-    }
-
+    private Function<Element, String> Id = e -> e.id().substring("favorites_album_".length());
     private Function<Element, String> src = e -> e.attr("src").split("\\?")[0];
-
     private Function<Element, Integer> dataIndex = e -> Integer.valueOf(e.attr("data-index"));
-
     private Function<Element, String> dataAlbum = e -> e.attr("data-album");
-
     private Function<Element, Integer> dataPage = e -> Integer.valueOf(e.attr("data-page"));
-
     private Function<Element, String> dataOriginal = e -> e.attr("data-original").split("\\?")[0];
 
+    /*************************************************************************************************************************** */
+
+    @Tool(description = "根据 comic ID 获取 Comic 对象")
+    public Comic search(String id) {
+        String html = requestComic(id);
+        if (html == null) return null;
+
+        Document doc = Jsoup.parse(html);
+        String title = getTitle(doc);
+        List<String> covers = getCovers(doc);
+        Elements albumElements = getAlbumElements(doc);
+
+        Comic comic = new Comic(id,title, covers);
+        if (albumElements.isEmpty()) {
+            comic.getAlbums().add(new Album(id, 0));
+        } else {
+            albumElements.stream()
+                .map(albumElement -> new Album(dataAlbum.apply(albumElement), dataIndex.apply(albumElement)))
+                .sorted(Comparator.comparing(Album::getIndex))
+                .forEachOrdered(comic.getAlbums()::add);
+        }
+        
+        return comic;
+    }
+
+    @Tool(description = "根据 comic ID 更新 Comic 对象")
+    public void getComicById(String id) {
+        getComicById(id, 0, Integer.MAX_VALUE);
+    }
 }

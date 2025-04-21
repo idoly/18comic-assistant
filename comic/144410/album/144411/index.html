@@ -8,20 +8,20 @@
     <title>把你玩坏掉(完結)-第1话</title>
 </head>
 <body class="w-full h-full bg-[#ececec] text-[#777]">
-    <div class="md:w-3/4 sm:w-full mx-auto flex flex-col items-center">
-        <img class="border-x-1 border-white" src="0.png" width="720" height ="3000" alt="0.png" />
-        <img class="border-x-1 border-white" src="1.png" width="720" height ="3000" alt="1.png" />
-        <img class="border-x-1 border-white" src="2.png" width="720" height ="3033" alt="2.png" />
-        <img class="border-x-1 border-white" src="3.png" width="720" height ="3000" alt="3.png" />
-        <img class="border-x-1 border-white" src="4.png" width="720" height ="3034" alt="4.png" />
-        <img class="border-x-1 border-white" src="5.png" width="720" height ="3000" alt="5.png" />
-        <img class="border-x-1 border-white" src="6.png" width="720" height ="3000" alt="6.png" />
-        <img class="border-x-1 border-white" src="7.png" width="720" height ="3000" alt="7.png" />
-        <img class="border-x-1 border-white" src="8.png" width="720" height ="3000" alt="8.png" />
-        <img class="border-x-1 border-white" src="9.png" width="720" height ="2296" alt="9.png" />
-        <img class="border-x-1 border-white" src="10.png" width="720" height ="3000" alt="10.png" />
-        <img class="border-x-1 border-white" src="11.png" width="720" height ="3000" alt="11.png" />
-        <img class="border-x-1 border-white" src="12.png" width="720" height ="3033" alt="12.png" />
+    <div class="md:w-3/4 sm:w-full mx-auto flex flex-col items-center border-x-1 border-white">
+        <img src="0.png" width="720" height ="3000" alt="0.png" />
+        <img src="1.png" width="720" height ="3000" alt="1.png" />
+        <img src="2.png" width="720" height ="3033" alt="2.png" />
+        <img src="3.png" width="720" height ="3000" alt="3.png" />
+        <img src="4.png" width="720" height ="3034" alt="4.png" />
+        <img src="5.png" width="720" height ="3000" alt="5.png" />
+        <img src="6.png" width="720" height ="3000" alt="6.png" />
+        <img src="7.png" width="720" height ="3000" alt="7.png" />
+        <img src="8.png" width="720" height ="3000" alt="8.png" />
+        <img src="9.png" width="720" height ="2296" alt="9.png" />
+        <img src="10.png" width="720" height ="3000" alt="10.png" />
+        <img src="11.png" width="720" height ="3000" alt="11.png" />
+        <img src="12.png" width="720" height ="3033" alt="12.png" />
     </div>
     <div id="nav-buttons" class="sticky bottom-5 mt-10 flex flex-col items-center gap-2 transition-opacity duration-300 ease-in-out opacity-100 pointer-events-auto">
         <button aria-label="返回顶部" tabindex="-1" class="px-3 py-2 rounded shadow-inner border border-[#ccc] bg-[#d6d6d6] text-[#666] hover:bg-[#c8c8c8] hover:text-[#444] transition-all duration-300 shadow-md"
@@ -48,10 +48,8 @@
                 </svg>
             </button>
             <button aria-label="下一话" tabindex="-1" class="px-3 py-2 rounded shadow-inner border border-[#ccc] 
-                bg-[#ccc] text-[#555] hover:bg-[#bbb] hover:text-[#333] transition-all duration-300 shadow-md
-                "
-                onclick="window.location.href='../144412/index.html';"
-                >
+                bg-[#e0e0e0] text-[#aaa] cursor-not-allowed"
+                disabled>
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
                 </svg>
@@ -65,18 +63,14 @@
 
         function updateNavVisibility() {
             const y = window.scrollY;
+            const viewportHeight = window.innerHeight;
             const totalHeight = Math.max(
                 document.body.scrollHeight,
                 document.documentElement.scrollHeight
             );
-            const viewportHeight = window.innerHeight;
 
-            // 提前一点判定“底部”，兼容 iOS 隐藏地址栏时 innerHeight 的误差
             const atBottom = y + viewportHeight >= totalHeight - 10;
-
-            // 判断是否向上滚动或到底部
             const shouldShow = atBottom || y < lastY;
-
             nav.style.opacity = shouldShow ? '1' : '0';
             nav.style.pointerEvents = shouldShow ? 'auto' : 'none';
 
@@ -93,7 +87,6 @@
             }
         });
 
-        // 初次进入页面执行一次
         updateNavVisibility();
     </script>
 </body>

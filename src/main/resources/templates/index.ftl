@@ -21,15 +21,15 @@
   <title>18comic-assistant</title>
 </head>
 <body class="w-full h-full bg-[#ececec] text-[#777]">
-  <div class="w-3/4 mx-auto mt-5 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
+  <div class="mx-auto mt-5 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
     <#list comics as comic>
       <#assign id = comic.id()>
       <#assign title = comic.title()>
       <div class="w-full max-w-sm flex flex-col overflow-hidden rounded-lg shadow group p-2 bg-[#fffdf8] border border-[#e8e4d9] hover:border-[#d6cbaa] transition-colors duration-300 shadow-sm hover:shadow-md hover:bg-[#fefcf5]">
         <img src="comic/${id}/0.png" class="w-full aspect-[3/4] object-cover rounded-md shadow" />
         <div class="flex flex-col justify-between flex-1 overflow-hidden mt-2">
-            <div class="flex-1 overflow-hidden hide-scrollbar">
-                <div class="whitespace-nowrap inline-block group-hover:animate-marquee">
+            <div class="flex-1 overflow-hidden hide-scrollbar text-center">
+                <div class="whitespace-nowrap inline-block title-text group-hover:animate-marquee">
                 <span class="text-sm overflow-hidden">
                     ${title}
                 </span>

@@ -27,7 +27,7 @@ public class Album {
 
     private Integer index;
 
-    private Integer total;
+    private Integer total = 0;
 
     @OneToMany(mappedBy = "album", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("index ASC")
@@ -36,6 +36,12 @@ public class Album {
     public Album() {}
 
     public Album(String id, Integer index) {
+        this.id = id;
+        this.index = index;
+    }
+
+    public Album(Comic comic, String id, Integer index) {
+        this.comic = comic;
         this.id = id;
         this.index = index;
     }
@@ -132,10 +138,5 @@ public class Album {
         public void setTotal(Integer total) {
             this.total = total;
         }
-    }
-
-
-    public static void main(String[] args) {
-        
     }
 }

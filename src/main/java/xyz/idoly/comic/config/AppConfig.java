@@ -7,6 +7,7 @@ import java.net.ProxySelector;
 import java.net.http.HttpClient;
 import java.net.http.HttpClient.Redirect;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -78,7 +79,11 @@ public class AppConfig {
 
     private String path = System.getProperty("user.dir");
 
-    private List<String> urls;
+    private List<String> urls = new ArrayList<>();
+
+    private String username;
+
+    private String password;
 
     private String userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36 Edg/134.0.0.0";
 
@@ -98,6 +103,22 @@ public class AppConfig {
 
     public void setUrls(List<String> urls) {
         this.urls = urls;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     public String getUserAgent() {
