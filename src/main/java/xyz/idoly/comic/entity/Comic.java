@@ -7,6 +7,7 @@ import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -17,7 +18,7 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.OrderBy;
 
 @Entity
-@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class Comic {
 
     @Id
@@ -25,19 +26,23 @@ public class Comic {
 
     private String title;
 
+    private String synopsis;
+
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "json")
     private List<String> covers = new ArrayList<>();
 
     @OneToMany(mappedBy = "comic", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("index ASC")
+    @JsonManagedReference
     private List<Album> albums = new ArrayList<>();
 
     public Comic() {}
 
-    public Comic(String id, String title, List<String> covers) {
+    public Comic(String id, String title, String synopsis, List<String> covers) {
         this.id = id;
         this.title = title;
+        this.synopsis = synopsis;
         this.covers = covers;
     }
 
@@ -55,6 +60,14 @@ public class Comic {
 
     public void setTitle(String title) {
         this.title = title;
+    }
+
+    public String getSynopsis() {
+        return synopsis;
+    }
+
+    public void setSynopsis(String synopsis) {
+        this.synopsis = synopsis;
     }
 
     public List<String> getCovers() {
@@ -75,8 +88,11 @@ public class Comic {
 
     @Override
     public String toString() {
-        return "Comic [id=" + id + ", title=" + title + ", cover=" + covers + ", albums=" + albums + "]";
+        return "Comic [id=" + id + ", title=" + title + ", synopsis=" + synopsis + ", covers=" + covers + ", albums=" + albums + "]";
     }
+
+
+
 
     public record WithoutAlbums(String id, String title, List<String> covers) {}
 

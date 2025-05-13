@@ -1,36 +1,31 @@
 package xyz.idoly.comic.controller;
 
-import org.springframework.ai.chat.client.ChatClient;
-import org.springframework.ai.openai.OpenAiChatModel;
+import java.io.File;
+import java.io.IOException;
+
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
 
-import jakarta.annotation.Resource;
-import xyz.idoly.comic.entity.Comic;
-import xyz.idoly.comic.service.ComicService;
-
-@RestController
+@Controller
 public class IndexController {
 
-    @Resource
-    private ComicService comicService;
+    @GetMapping("/")
+    public String demo() {
+        return "ai";
+    }
 
-	@Resource
-	private OpenAiChatModel chatModel;
+    @GetMapping("/index.html")
+    public ResponseEntity<Resource> index() throws IOException {
+        File file = new File("index.html");
+        if (!file.exists()) {
+            return ResponseEntity.notFound().build();
+        }
 
-    // @GetMapping("/query")
-    // public String queryComicById(@RequestParam String id) {
-    //     return ChatClient.create(chatModel)
-    //         .prompt("帮我查个漫画, 它的id是 " + id)
-    //         .tools(comicService)
-    //         .call()
-    //         .content();
-    // }
-
-    // @GetMapping("/query")
-    // public Comic queryComicById(@RequestParam String id) {
-    //     return comicService.search(id);
-    // }
-
+        Resource resource = new FileSystemResource(file);
+        return ResponseEntity.ok().contentType(MediaType.TEXT_HTML).body(resource);
+    }
 }

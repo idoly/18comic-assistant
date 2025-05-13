@@ -1,5 +1,7 @@
 package xyz.idoly.comic.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -16,6 +18,7 @@ public class Photo {
 
     @ManyToOne
     @JoinColumn(name = "album_id")
+    @JsonBackReference
     private Album album;
 
     private Integer index;

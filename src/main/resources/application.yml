@@ -6,6 +6,10 @@ spring:
   output:
     ansi:
       enabled: always
+  freemarker:
+    suffix: .ftl
+    template-loader-path: classpath:/templates/
+    cache: false
   h2:
     console.enabled: true # /h2-console
   jpa:
@@ -23,7 +27,7 @@ spring:
   comic:
     username: idolysfsdf
     password: zxcvbnm159456
-    urls: http://18comic-daima.cc, https://18comic.org, https://jmcomic-zzz.one
+    urls: https://18comic.org
     user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36 Edg/134.0.0.0
     proxy:
       host: 127.0.0.1
@@ -32,4 +36,7 @@ spring:
     openai:
       api-key: sk-be0bee62e5364e0387c6511ceab4f3e2
       base-url: https://api.deepseek.com
-      chat.options.model: deepseek-chat
+      chat:
+        options:
+          model: deepseek-chat
+          responseFormat.type: json_object

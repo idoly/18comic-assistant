@@ -3,7 +3,10 @@ package xyz.idoly.comic.entity;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
@@ -20,6 +23,7 @@ public class Album {
 
     @ManyToOne
     @JoinColumn(name = "comic_id")
+    @JsonBackReference
     private Comic comic;
 
     @Id
@@ -31,6 +35,8 @@ public class Album {
 
     @OneToMany(mappedBy = "album", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("index ASC")
+    @JsonManagedReference
+    @JsonIgnore
     private List<Photo> photos = new ArrayList<>();
 
     public Album() {}
