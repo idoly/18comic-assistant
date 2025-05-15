@@ -6,7 +6,7 @@ public class Result<T> {
     private String msg;
     private T data;
 
-    // private String type;
+    private String type;
 
     public static final int SUCCESS_CODE = 200;
     public static final String SUCCESS_MSG = "success";
@@ -74,6 +74,19 @@ public class Result<T> {
 
     public void setData(T data) {
          this.data = data;
+    }
+
+    public Result<T> type(String type) {
+        setType(type);
+        return this;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 
     @Override

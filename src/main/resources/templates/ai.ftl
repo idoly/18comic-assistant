@@ -9,6 +9,19 @@
     #chat-box::-webkit-scrollbar { display: none; }
     #chat-box { -ms-overflow-style: none; scrollbar-width: none; }
   </style>
+  <style type="text/tailwindcss">
+    @theme {
+        --animate-marquee: marquee 10s linear infinite;
+        @keyframes marquee {
+            0% {
+            transform: translateX(0%);
+            }
+            100% {
+            transform: translateX(-100%);
+            }
+        }
+    }
+  </style>
 </head>
 <body class="bg-gray-100">
 
@@ -44,6 +57,12 @@
       >
         关闭
       </button>
+      <button
+        id="refresh-web-btn"
+        class="absolute top-4 right-12 bg-green-500 text-white px-3 py-1 rounded-lg hover:bg-red-600 z-10"
+      >
+        刷新
+      </button>
       <iframe
         id="web-iframe"
         src=""
@@ -63,6 +82,8 @@
   const chatIn   = document.getElementById('chat-input');
   const webCt    = document.getElementById('web-content');
   const webIf    = document.getElementById('web-iframe');
+
+  const refreshBtn = document.getElementById('refresh-web-btn');
   const closeBtn = document.getElementById('close-web-btn');
 
   function scrollDown() {
@@ -156,7 +177,13 @@
     chatSide.classList.add('mx-auto');
   });
 
+  refreshBtn.addEventListener('click', () => {
+    showWebPreview(url);
+  });
+
   let socket;
+
+  let url = "";
 
   function connectWebSocket() {
     socket = new WebSocket("ws://localhost:8080/chat");
@@ -171,34 +198,235 @@
           }
         }
 
+        console.log(result)
+
+        // deepseek
         if (result.response) {
-          typeMsg(result.response);
-        } else if (result.error) {
-          typeMsg(result.error);
-        } else if (result.data){
-            showWebPreview('https://www.18comic.vip');
-        } else {
-          typeMsg('收到未知响应');
+          return typeMsg(result.response);
         }
+        
+        if (result.error) {
+          return typeMsg(result.error);
+        }
+        
+        // app
+        if (result.code !== 200 || !result.data) {
+          return typeMsg(result.msg)
+        } 
+
+        if (result.type == 'url') {
+            url = result.data
+            showWebPreview(result.data);
+        }
+
+        if (result.type == 'comic') {
+          if (result.data.albums) {
+            updateComicCard(result.data)
+          } else {
+            comicCard(result.data)
+          }
+        }
+
+        if (result.type == 'link') {
+
+        }
+        
       } catch (e) {
-        console.error('解析失败:', e);
-        addMsg('ai', 'AI 响应解析失败');
+        console.error(e);
       }
     };
 
     socket.onclose = () => {
-      addMsg('ai', "连接已关闭，尝试重连...");
       setTimeout(connectWebSocket, 3000);
     };
+  }
+
+  function downloadFile(url, filename) {
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename || ''; // 可选：指定下载时的文件名
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
   }
 
   function showWebPreview(url) {
     chatCt.classList.replace('flex-col', 'flex-row');
     chatSide.classList.replace('w-7/12', 'w-1/2');
     webCt.classList.remove('hidden');
-    webCt.classList.add('w-1/2', 'h-screen');
-    webIf.src = url;
+    webCt.classList.add('w-1/2','h-auto','m-4');
+    webIf.src = window.location.origin + url;
   }
+
+  function comicCard(comic) {
+    const card = document.createElement('div');
+    card.className = 'flex flex-col overflow-hidden rounded-lg shadow group p-4 bg-[#fffdf8] border border-[#e8e4d9] hover:border-[#d6cbaa] transition-colors duration-300 shadow-sm hover:shadow-md hover:bg-[#fefcf5] w-full max-w-md';
+
+    // 第 1 行：封面图
+    const cover = document.createElement('img');
+    cover.src = comic.covers?.[1] || comic.covers?.[0] || '';
+    cover.alt = comic.title;
+    cover.className = 'w-full aspect-[3/4] object-cover rounded-md shadow';
+
+    // 第 2 行：标题
+    const titleWrap = document.createElement('div');
+    titleWrap.className = 'overflow-hidden mt-2 text-center';
+
+    const title = document.createElement('div');
+    title.className = 'whitespace-nowrap inline-block title-text group-hover:animate-marquee';
+    title.textContent = comic.title;
+
+    // 检查是否需要滚动动画
+    setTimeout(() => {
+      const parent = title.parentElement;
+      if (title.scrollWidth <= parent.clientWidth) {
+        title.classList.remove('group-hover:animate-marquee');
+      }
+    }, 0);
+
+    titleWrap.appendChild(title);
+
+    // 第 3 行：简介（最多显示三行，鼠标悬停显示完整）
+    const description = document.createElement('p');
+    description.textContent = comic.description || '暂无简介';
+    description.title = description.textContent; // 鼠标悬停显示
+    description.className = 'text-sm text-gray-600 leading-relaxed mt-2 line-clamp-3';
+
+    // 第 4 行：按钮
+    const button = document.createElement('button');
+    button.textContent = '下载阅读';
+    button.className = 'mt-4 self-center bg-blue-500 hover:bg-blue-600 text-white px-5 py-2 rounded-full shadow transition';
+    button.onclick = () => {
+      url = comic.url;
+      showWebPreview(url);
+    };
+
+    card.append(cover, titleWrap, description, button);
+
+    // 包一层头像
+    const wrap = document.createElement('div');
+    wrap.className = 'flex items-start space-x-3 px-2 py-4';
+
+    const avatar = document.createElement('div');
+    avatar.className = 'w-10 h-10 rounded-full bg-gray-400 flex items-center justify-center text-white font-bold text-sm';
+    avatar.textContent = 'AI';
+
+    wrap.append(avatar, card);
+
+    chatBox.appendChild(wrap);
+    scrollDown();
+  }
+
+  function updateComicCard(comic) {
+    const card = document.createElement('div');
+    card.className = 'flex flex-col bg-white rounded-xl shadow p-4 w-full max-w-xl space-y-4';
+
+    // 1. 漫画封面
+    const cover = document.createElement('img');
+    cover.src = comic.covers?.[0] || '';
+    cover.alt = comic.title || '漫画封面';
+    cover.className = 'w-full rounded-md aspect-[3/4] object-cover';
+
+    // 2. 简介
+    const description = document.createElement('div');
+    description.textContent = comic.description || '暂无简介';
+    description.className = 'text-sm text-gray-700 leading-relaxed max-h-24 overflow-y-auto';
+
+    // 3. 操作按钮行
+    const buttonRow = document.createElement('div');
+    buttonRow.className = 'flex justify-between gap-3';
+
+    const downloadBtn = document.createElement('button');
+    downloadBtn.textContent = '下载';
+    downloadBtn.className = baseBtnClass();
+    downloadBtn.onclick = () => downloadComic(comic);
+
+    const updateBtn = document.createElement('button');
+    updateBtn.textContent = '更新';
+    updateBtn.className = baseBtnClass('bg-blue-500 hover:bg-blue-600');
+    updateBtn.onclick = () => updateComic(comic);
+
+    const deleteBtn = document.createElement('button');
+    deleteBtn.textContent = '删除';
+    deleteBtn.className = baseBtnClass('bg-red-500 hover:bg-red-600');
+    deleteBtn.onclick = () => deleteComic(comic);
+
+    buttonRow.append(downloadBtn, updateBtn, deleteBtn);
+
+    // 4. 章节目录（顺序/逆序切换 + 列表）
+    const dirContainer = document.createElement('div');
+    dirContainer.className = 'flex flex-col space-y-2';
+
+    const dirHeader = document.createElement('div');
+    dirHeader.className = 'flex justify-between items-center';
+
+    const dirTitle = document.createElement('span');
+    dirTitle.textContent = '目录';
+    dirTitle.className = 'font-semibold text-gray-800';
+
+    const toggleBtn = document.createElement('button');
+    toggleBtn.textContent = '逆序';
+    toggleBtn.className = 'text-blue-500 text-sm hover:underline cursor-pointer';
+
+    let reversed = false;
+    toggleBtn.onclick = () => {
+      reversed = !reversed;
+      toggleBtn.textContent = reversed ? '顺序' : '逆序';
+      renderChapters();
+    };
+
+    dirHeader.append(dirTitle, toggleBtn);
+
+    const chapterList = document.createElement('div');
+    chapterList.className = 'max-h-40 overflow-y-auto flex flex-col gap-1 text-sm text-gray-600';
+
+    function renderChapters() {
+      chapterList.innerHTML = '';
+      const chapters = reversed ? [...comic.albums].reverse() : comic.albums;
+      chapters.forEach(album => {
+        const link = document.createElement('a');
+        link.textContent = "第" + album.index + "话";
+        link.href = "#"; // 防止直接跳转
+        link.target = '_self'; // 无需打开新标签
+        link.className = 'hover:text-blue-500 truncate cursor-pointer';
+        
+        // 添加点击事件：调用 showWebPreview
+        link.addEventListener('click', (e) => {
+          e.preventDefault(); // 阻止默认跳转
+          const previewUrl = '/comic/' + comic.id + "/album/" + album.id + "/index.html";
+          showWebPreview(previewUrl);
+        });
+
+        chapterList.appendChild(link);
+      });
+    }
+
+    function showWebPreview(url) {
+      chatCt.classList.replace('flex-col', 'flex-row');
+      chatSide.classList.replace('w-7/12', 'w-1/2');
+      webCt.classList.remove('hidden');
+      webCt.classList.add('w-1/2','h-auto','m-4');
+      webIf.src = window.location.origin + url;
+    }
+
+    renderChapters();
+    dirContainer.append(dirHeader, chapterList);
+
+    // 组装
+    card.append(cover, description, buttonRow, dirContainer);
+
+    const wrap = document.createElement('div');
+    wrap.className = 'flex justify-center p-4';
+    wrap.appendChild(card);
+    chatBox.appendChild(wrap);
+    scrollDown();
+  }
+
+  // 公共按钮样式生成
+  function baseBtnClass(extra = 'bg-gray-300 hover:bg-gray-400') {
+    return 'flex-1 py-2 rounded font-semibold text-white transition ' + extra;
+  }
+
 
   connectWebSocket();
 </script>

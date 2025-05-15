@@ -13,6 +13,7 @@ spring:
   h2:
     console.enabled: true # /h2-console
   jpa:
+    open-in-view: false
     database-platform: org.hibernate.dialect.H2Dialect
     hibernate:
       ddl-auto: update
@@ -33,10 +34,8 @@ spring:
       host: 127.0.0.1
       port: 12334
   ai:
-    openai:
-      api-key: sk-be0bee62e5364e0387c6511ceab4f3e2
-      base-url: https://api.deepseek.com
+    deepseek:
+      api-key: sk-c63749802f29483cba33e2e596bd7f87
       chat:
         options:
-          model: deepseek-chat
           responseFormat.type: json_object

@@ -196,28 +196,36 @@ public class ComicService {
         return albumRepository.saveAndFlush(album);
     }
     
-    private Comic getComic(String id) {
+    public Comic getComic(String id) {
+        return getComic(id, true);
+    }
+
+    public Comic getComic(String id, boolean requestAlbum) {
         String html = requestComic(id);
         if (html == null) return null;
     
         Document doc = Jsoup.parse(html);
         String title = getTitle(doc);
-        String synopsis = getSynopsis(doc);
+        String description = getDescription(doc);
         List<String> covers = getCovers(doc);
-        
-        Elements albumElements = getAlbumElements(doc);
-    
-        Comic comic = comicRepository.findById(id).orElseGet(() -> comicRepository.saveAndFlush(new Comic(id, title, synopsis, covers)));
-        Map<String, Album> idToAlbum = comic.getAlbums().stream().collect(Collectors.toMap(Album::getId, Function.identity()));
-    
-        comic.setAlbums(albumElements.isEmpty() 
-            ? List.of(idToAlbum.computeIfAbsent(id, albumId -> getAlbum(comic, albumId, 0))) 
-            : albumElements.stream().map(albumElement -> idToAlbum.computeIfAbsent(dataAlbum.apply(albumElement), albumId -> getAlbum(comic, albumId, dataIndex.apply(albumElement))))
-              .sorted(Comparator.comparing(Album::getIndex))
-              .collect(Collectors.toList())
-        );
 
-        return comic;
+        if (requestAlbum)  {
+            Elements albumElements = getAlbumElements(doc);
+        
+            Comic comic = comicRepository.findById(id).orElseGet(() -> comicRepository.saveAndFlush(new Comic(id, title, description, covers)));
+            Map<String, Album> idToAlbum = comic.getAlbums().stream().collect(Collectors.toMap(Album::getId, Function.identity()));
+        
+            comic.setAlbums(albumElements.isEmpty() 
+                ? List.of(idToAlbum.computeIfAbsent(id, albumId -> getAlbum(comic, albumId, 0))) 
+                : albumElements.stream().map(albumElement -> idToAlbum.computeIfAbsent(dataAlbum.apply(albumElement), albumId -> getAlbum(comic, albumId, dataIndex.apply(albumElement))))
+                .sorted(Comparator.comparing(Album::getIndex))
+                .collect(Collectors.toList())
+            );
+            
+            return comic;
+        }
+
+        return new Comic(id, title, description, covers);
     }
 
     private Comic getComic(String id, int start, int end) {
@@ -383,6 +391,44 @@ public class ComicService {
         return zip(comic, file);
     }
 
+    public Result<Void> deleteComic(String id) {
+        try {
+            comicRepository.deleteById(id);
+            templateIndex();
+
+            Path path = ROOT.resolve("comic").resolve(id);
+            if (Files.exists(path)) {
+                Files.walk(path).sorted(Comparator.reverseOrder()).map(Path::toFile).forEach(File::delete);
+            }
+        } catch (IOException e) {
+            log.error("deleteComic failed: [comic=" + id + ", e=" + e.getMessage() + "]");
+            return Result.error("deleteComic failed");
+        }
+
+        log.info("deleteComic succeeded: [comic=" + id + "]");
+        return Result.success();
+    }
+
+    public Result<Comic> queryComic(String id) {
+        Comic comic = comicRepository.findById(id).get();
+        comic = getComic(id, comic != null ? true : false);
+        if (comic == null) return Result.error("queryComic failed");
+
+        return Result.success(comic);
+    }
+
+    public Result<Comic> recommendComic() {
+        String html = request(getUrl(), String.class);
+        if (html == null) return Result.error("recommendComics failed");
+
+        Document doc = Jsoup.parse(html);
+        String id = recommendComicId(doc);
+        Comic comic = getComic(id, false);
+        if (comic == null) return Result.error("recommendComic failed");
+
+        return Result.success(comic);
+    }
+
     /*************************************************************************************************************************** */
 
     private Album getAlbumById(String id)  {
@@ -399,11 +445,11 @@ public class ComicService {
 
             doc = Jsoup.parse(html);
             String title = getTitle(doc);
-            String synopsis = getSynopsis(doc);
+            String description = getDescription(doc);
             List<String> covers = getCovers(doc);
             Elements albumElements = getAlbumElements(doc);
         
-            Comic comic = comicRepository.findById(comicId).orElseGet(() -> comicRepository.saveAndFlush(new Comic(comicId, title, synopsis, covers)));
+            Comic comic = comicRepository.findById(comicId).orElseGet(() -> comicRepository.saveAndFlush(new Comic(comicId, title, description, covers)));
 
             Album album = albumElements.stream()
                 .filter(albumElement -> dataAlbum.apply(albumElement).equals(id))
@@ -687,7 +733,7 @@ public class ComicService {
     }
 
     private String getTitle(Document doc) {
-        return doc.select("#book-name").text();
+        return doc.select("#wrapper > div.container > div:nth-child(4) > div > h1").text();
     }
 
     private List<String> getCovers(Document doc) {
@@ -704,15 +750,15 @@ public class ComicService {
         return covers;
     }
 
-    private String getSynopsis (Document doc) {
-        return doc.select("#intro-block > div:nth-child(3)").text().replace("敘述：", "");
+    private String getDescription (Document doc) {
+        return doc.select("#intro-block > h2").text().replace("敘述：", "");
     }
 
     private Optional<String> getComicId(Document doc) {
         return Optional.ofNullable(doc.select("#series_id").attr("value")).filter(s -> !s.isEmpty());
     }
 
-    private String randomComicId(Document doc) {
+    private String recommendComicId(Document doc) {
         return doc.select("#Comic_Top_Nav > div.container > div.navbar-header > div.d-flex > ul.nav.navbar-nav.navbar-right.d-flex.align-items-center > li:nth-child(6) > a").attr("href").replaceFirst("^/album/", "");
     }
 
@@ -736,28 +782,6 @@ public class ComicService {
     private Function<Element, String> dataOriginal = e -> e.attr("data-original").split("\\?")[0];
 
     /*************************************************************************************************************************** */
-
-    public Result<Comic> recommendComics() {
-        String html = request(getUrl(), String.class);
-        if (html == null) return Result.error("recommendComics failed");
-
-        Document doc = Jsoup.parse(html);
-        String comicId = randomComicId(doc);
-
-        return queryComic(comicId);
-    }
-
-    public Result<Comic> queryComic(String id) {
-        String html = requestComic(id);
-        if (html == null) return Result.error("queryComic failed");
-
-        Document doc = Jsoup.parse(html);
-        String title = getTitle(doc);
-        String synopsis = getSynopsis(doc);
-        List<String> covers = getCovers(doc);
-
-        return Result.success(new Comic(id, title, synopsis, covers));
-    }
 
     public Result<Void> login(String username, String password) {
         config.setUsername(username);
@@ -792,8 +816,8 @@ public class ComicService {
         return Result.error(msg);
     }
 
-    public Result<String> status() {
-        return Result.success(this.url == null ? "unauthenticated" : config.getUsername() + ":" + config.getPassword());
+    public Result<Boolean> status() {
+        return Result.success(this.url != null);
     }
 
     public Result<Void> logout() {
@@ -801,6 +825,32 @@ public class ComicService {
         config.setPassword(null);
         this.url = null;
         return Result.success();
+    }
+
+    public Result<List<String>> queryFavorites() {
+        if (Strings.isEmpty(config.getUsername()) || Strings.isEmpty(config.getPassword())) {
+            log.error("queryFavorites failed: account or password is empty – automatic login failed; please log in manually");
+            return Result.error("Account or password is empty. Please log in manually.");
+        }
+
+        if (url == null) {
+            login(config.getUsername(), config.getPassword());
+            if (url == null) {
+                log.error("queryFavorites failed: login failed");
+                return Result.error("Login failed. Cannot retrieve favorites list.");
+            }
+        }
+
+        String html = requestFavorites();
+        if (html == null) return Result.error("requestFavorites failed");
+
+        Document doc = Jsoup.parse(html);
+        Elements comicElements = getComicElements(doc);
+        List<String> results = new ArrayList<>();
+        comicElements.stream().map(Id::apply).map(this::getComic).forEach(comic -> results.add(comic.getTitle()));
+        log.info("queryFavorites succeeded: found " + results.size() + " favorite comics");
+
+        return Result.success(results);
     }
 
     public Result<List<Result<Comic>>> downloadFavorites() {
@@ -824,7 +874,7 @@ public class ComicService {
         Elements comicElements = getComicElements(doc);
         List<Result<Comic>> results = new ArrayList<>();
         comicElements.stream().map(Id::apply).map(this::downloadComic).forEach(results::add);
-        log.info("downloadFavorites succeeded: downloaded" + results.size() + " favorite comics");
+        log.info("downloadFavorites succeeded: downloaded " + results.size() + " favorite comics");
 
         return Result.success(results);
     }

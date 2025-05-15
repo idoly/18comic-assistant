@@ -26,7 +26,7 @@ public class Comic {
 
     private String title;
 
-    private String synopsis;
+    private String description;
 
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "json")
@@ -39,10 +39,10 @@ public class Comic {
 
     public Comic() {}
 
-    public Comic(String id, String title, String synopsis, List<String> covers) {
+    public Comic(String id, String title, String description, List<String> covers) {
         this.id = id;
         this.title = title;
-        this.synopsis = synopsis;
+        this.description = description;
         this.covers = covers;
     }
 
@@ -62,12 +62,12 @@ public class Comic {
         this.title = title;
     }
 
-    public String getSynopsis() {
-        return synopsis;
+    public String getDescription() {
+        return description;
     }
 
-    public void setSynopsis(String synopsis) {
-        this.synopsis = synopsis;
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public List<String> getCovers() {
@@ -88,13 +88,8 @@ public class Comic {
 
     @Override
     public String toString() {
-        return "Comic [id=" + id + ", title=" + title + ", synopsis=" + synopsis + ", covers=" + covers + ", albums=" + albums + "]";
+        return "Comic [id=" + id + ", title=" + title + ", description=" + description + ", covers=" + covers + ", albums=" + albums + "]";
     }
 
-
-
-
     public record WithoutAlbums(String id, String title, List<String> covers) {}
-
-
 }

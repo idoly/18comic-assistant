@@ -28,7 +28,14 @@ public class Application {
 	public CommandLineRunner runner(ComicService comicService) {
 		return args -> {
 
-			System.out.println(comicService.recommendComics());
+			// System.out.println(comicService.queryComic("已婚学生"));
+			// System.out.println(comicService.queryComic("195818"));
+
+			// comicService.updateAllComics();
+
+			// comicService.deleteComic("584487");
+
+			// System.out.println(comicService.recommendComics());
 
 			// comicService.downloadComic("432873", Set.of(4,7));
 			// // // 漫画：多章节
