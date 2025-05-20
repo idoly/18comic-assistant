@@ -21,11 +21,16 @@
   <title>18comic-assistant</title>
 </head>
 <body class="w-full h-full bg-[#ececec] text-[#777]">
+
+  <div class="w-full max-w-md mx-auto mt-4">
+    <input type="text" id="search" placeholder="标题或编号" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:border-blue-300"/>
+  </div>
+
   <div class="mx-auto mt-5 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
   <#list comics as comic>
   <#assign id = comic.id()>
   <#assign title = comic.title()>
-    <a href="comic/${id}/index.html" class="w-full max-w-sm flex flex-col overflow-hidden rounded-lg shadow group p-2 bg-[#fffdf8] border border-[#e8e4d9] hover:border-[#d6cbaa] transition-colors duration-300 shadow-sm hover:shadow-md hover:bg-[#fefcf5]">
+    <a data-id="${id}" data-title="${title?lower_case}" href="comic/${id}/index.html" class="w-full max-w-sm flex flex-col overflow-hidden rounded-lg shadow group p-2 bg-[#fffdf8] border border-[#e8e4d9] hover:border-[#d6cbaa] transition-colors duration-300 shadow-sm hover:shadow-md hover:bg-[#fefcf5]">
       <img src="comic/${id}/0.png" class="w-full aspect-[3/4] object-cover rounded-md shadow" />
       <div class="flex flex-col justify-between flex-1 overflow-hidden mt-2">
           <div class="flex-1 overflow-hidden hide-scrollbar text-center">
@@ -46,6 +51,19 @@
         if (el.scrollWidth <= parent.clientWidth) {
           el.classList.remove("group-hover:animate-marquee");
         }
+      });
+
+      const searchInput = document.getElementById("search");
+      const cards = document.querySelectorAll("a[data-id][data-title]");
+
+      searchInput.addEventListener("input", () => {
+        const keyword = searchInput.value.trim().toLowerCase();
+        cards.forEach(card => {
+          const id = card.dataset.id.toLowerCase();
+          const title = card.dataset.title;
+          const match = id.includes(keyword) || title.includes(keyword);
+          card.style.display = match ? "" : "none";
+        });
       });
     });
   </script>

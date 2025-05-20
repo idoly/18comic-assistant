@@ -1,15 +1,30 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <link rel="icon" href="../../favicon.ico">
-    <title>${comic.title}</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <link rel="icon" href="../../../../favicon.ico">
+  <title>${comic.title}</title>
 </head>
-<body class="w-full h-full bg-[#ececec] text-[#777]">
-<#list albums as album>
-    <a href="album/${album.id}/index.html">第${album.index?c}话</a>
-</#list>
+<body class="bg-[#ececec] text-[#777] min-h-screen flex flex-col items-center justify-center p-4">
+  <h1 class="text-3xl font-bold mb-6 text-center">${comic.title}</h1>
+  <div class="flex flex-col md:flex-row w-full md:w-3/4 mx-auto gap-4 items-stretch max-h-[700px]">
+    <img src="1.png" alt="${comic.title}" class="w-full md:w-2/5 bg-white p-4 rounded shadow aspect-square object-cover" />
+
+    <div class="w-full md:w-1/2 flex flex-col bg-white rounded shadow overflow-hidden">
+      <div class="p-4">
+        <p class="text-gray-700 text-sm md:text-base">${comic.description!""}</p>
+      </div>
+
+      <div class="p-4 border-t flex-1 overflow-y-auto">
+        <div class="flex flex-col gap-2">
+        <#list albums as album>
+            <a href="album/${album.id}/index.html" class="block px-4 py-2 bg-gray-100 rounded hover:bg-gray-200 transition">第${album.index?c}话</a>
+        </#list>
+        </div>
+      </div>
+    </div>
+  </div>
 </body>
 </html>

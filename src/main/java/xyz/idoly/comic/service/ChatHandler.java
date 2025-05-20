@@ -67,52 +67,67 @@ public class ChatHandler extends TextWebSocketHandler {
     }
 
     @Tool(description = "下载漫画", returnDirect = true)
-    public Result<File> zipComic(String id) {
-        return comicService.zipComic(id).type("link");
+    public Result<String> zipComic(String id) {
+        Result<File> zipResult = comicService.zipComic(id);
+        if (zipResult.getCode() != Result.SUCCESS_CODE) {
+            return Result.error(zipResult.getMsg());
+        }
+
+        return Result.success(zipResult.getData().getName()).type("file");
     }
 
     @Tool(description = "下载漫画范围", returnDirect = true)
-    public Result<File>  zipComicRange(String id, Integer start, Integer end) {
-        return comicService.zipComic(id, start, end).type("link");
+    public Result<String>  zipComicRange(String id, Integer start, Integer end) {
+        Result<File> zipResult = comicService.zipComic(id, start, end);
+        if (zipResult.getCode() != Result.SUCCESS_CODE) {
+            return Result.error(zipResult.getMsg());
+        }
+
+        return Result.success(zipResult.getData().getName()).type("file");
     }
 
     @Tool(description = "下载漫画章节", returnDirect = true)
-    public Result<File> zipComicAlbums(String id, Set<Integer> selectIndexs) {
-        return comicService.zipComic(id, selectIndexs).type("link");
+    public Result<String> zipComicAlbums(String id, Set<Integer> selectIndexs) {
+        Result<File> zipResult = comicService.zipComic(id, selectIndexs);
+        if (zipResult.getCode() != Result.SUCCESS_CODE) {
+            return Result.error(zipResult.getMsg());
+        }
+
+        return Result.success(zipResult.getData().getName()).type("file");
     }
 
-    @Tool(description = "同步漫画")
+    @Tool(description = "同步漫画", returnDirect = false)
     public Result<Void> downloadComic(String id) {
         Result<Comic> comicResult = comicService.downloadComic(id);
         return new Result<>(comicResult.getCode(), comicResult.getMsg());
     }
 
-    @Tool(description = "删除漫画")
+    @Tool(description = "删除漫画", returnDirect = false)
     public Result<Void> deleteComic(String id) {
         return comicService.deleteComic(id);
     }
 
-    @Tool(description = "用户登陆")
+    @Tool(description = "用户登陆", returnDirect = false)
     public Result<Void> login(String username, String password) {
         return comicService.login(username, password);
     }
 
-    @Tool(description = "登陆状态")
+    @Tool(description = "登陆状态", returnDirect = false)
     public Result<Boolean> status() {
         return comicService.status();
     }
 
-    @Tool(description = "注销登陆")
+    @Tool(description = "注销登陆", returnDirect = false)
     public Result<Void> logout() {
         return comicService.logout();
     }
 
-    @Tool(description = "查看收藏")
+    @Tool(description = "查看收藏", returnDirect = false)
     public Result<List<String>> queryFavorites() {
         return comicService.queryFavorites();
     }
 
-    @Tool(description = "下载收藏")
+    @Tool(description = "下载收藏", returnDirect = false)
     public Result<List<Result<Comic>>> downloadFavorites() {
         return comicService.downloadFavorites();
     }

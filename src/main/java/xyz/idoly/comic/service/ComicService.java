@@ -285,8 +285,8 @@ public class ComicService {
 
         Comic comic = getComic(id, start, end);
         if (comic == null) {
-            log.error("downloadComic failed: comic [" + id + "] not found");
-            return Result.error("Comic not found: " + id);
+            log.error("getComic failed: comic [" + id + "]");
+            return Result.error("getComic failed: " + id);
         }
 
         download(comic);
@@ -303,8 +303,8 @@ public class ComicService {
 
         Comic comic = getComic(id, selectIndexs);
         if (comic == null) {
-            log.error("downloadComic failed: comic [" + id + "] not found");
-            return Result.error("Comic not found: " + id);
+            log.error("getComic failed: comic [" + id + "]");
+            return Result.error("getComic failed: " + id);
         }
 
         download(comic);
@@ -329,7 +329,7 @@ public class ComicService {
                         }
 
                         try (InputStream in = new FileInputStream(photoFile)) {
-                            zip.putNextEntry(new ZipEntry(album.getId() + "/" + photo.getIndex() + ".png"));
+                            zip.putNextEntry(new ZipEntry(album.getIndex() + "/" + photo.getIndex() + ".png"));
                             in.transferTo(zip);
                             zip.closeEntry();
                         }

@@ -3,8 +3,9 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <link rel="icon" href="favicon.ico" />
   <title>18comic-assistant</title>
-  <script src="https://cdn.tailwindcss.com"></script>
   <style>
     #chat-box::-webkit-scrollbar { display: none; }
     #chat-box { -ms-overflow-style: none; scrollbar-width: none; }
@@ -23,8 +24,7 @@
     }
   </style>
 </head>
-<body class="bg-gray-100">
-
+<body class="w-screen h-screen bg-gray-100">
   <div id="init-container" class="flex flex-col items-center justify-center h-screen text-center px-4 relative">
     <div class="absolute top-[40%] left-1/2 -translate-x-1/2 -translate-y-[45%] flex flex-col items-center">
       <img src="logo.png"/>
@@ -37,7 +37,7 @@
     </div>
   </div>
 
-  <div id="chat-container" class="hidden">
+  <div id="chat-container" class="w-full h-full hidden">
     <div id="chat-side" class="flex flex-col h-screen">
       <div id="chat-box" class="flex-1 overflow-y-auto bg-white m-4 p-4 space-y-4 rounded-lg shadow"></div>
       <div class="sticky bottom-0 bg-gray-100 p-4">
@@ -51,357 +51,191 @@
     </div>
 
     <div id="web-content" class="hidden relative">
-      <button
-        id="close-web-btn"
-        class="absolute top-4 right-4 bg-red-500 text-white px-3 py-1 rounded-lg hover:bg-red-600 z-10"
-      >
-        关闭
+      <button id="close-web-btn" class="absolute top-4 right-6 p-2 rounded-full bg-red-500 hover:bg-red-600 z-10 text-white">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><!-- Icon from Google Material Icons by Material Design Authors - https://github.com/material-icons/material-icons/blob/master/LICENSE --><path fill="currentColor" d="M12 2C6.47 2 2 6.47 2 12s4.47 10 10 10s10-4.47 10-10S17.53 2 12 2m4.3 14.3a.996.996 0 0 1-1.41 0L12 13.41L9.11 16.3a.996.996 0 1 1-1.41-1.41L10.59 12L7.7 9.11A.996.996 0 1 1 9.11 7.7L12 10.59l2.89-2.89a.996.996 0 1 1 1.41 1.41L13.41 12l2.89 2.89c.38.38.38 1.02 0 1.41"/></svg>
       </button>
-      <button
-        id="refresh-web-btn"
-        class="absolute top-4 right-12 bg-green-500 text-white px-3 py-1 rounded-lg hover:bg-red-600 z-10"
-      >
-        刷新
+      <button id="refresh-web-btn" class="absolute top-4 right-18 p-2 rounded-full bg-green-500 hover:bg-green-600 z-10 text-white">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><!-- Icon from Google Material Icons by Material Design Authors - https://github.com/material-icons/material-icons/blob/master/LICENSE --><path fill="currentColor" d="M17.65 6.35a7.95 7.95 0 0 0-6.48-2.31c-3.67.37-6.69 3.35-7.1 7.02C3.52 15.91 7.27 20 12 20a7.98 7.98 0 0 0 7.21-4.56c.32-.67-.16-1.44-.9-1.44c-.37 0-.72.2-.88.53a5.994 5.994 0 0 1-6.8 3.31c-2.22-.49-4.01-2.3-4.48-4.52A6.002 6.002 0 0 1 12 6c1.66 0 3.14.69 4.22 1.78l-1.51 1.51c-.63.63-.19 1.71.7 1.71H19c.55 0 1-.45 1-1V6.41c0-.89-1.08-1.34-1.71-.71z"/></svg>
       </button>
-      <iframe
-        id="web-iframe"
-        src=""
-        frameborder="0"
-        width="100%"
-        height="100%"
-      ></iframe>
+      <button id="toggle-size-btn" class="absolute top-4 right-30 p-2 rounded-full bg-blue-500 hover:bg-blue-600 z-10 text-white">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><!-- Icon from Google Material Icons by Material Design Authors - https://github.com/material-icons/material-icons/blob/master/LICENSE --><path fill="currentColor" d="M6 14c-.55 0-1 .45-1 1v3c0 .55.45 1 1 1h3c.55 0 1-.45 1-1s-.45-1-1-1H7v-2c0-.55-.45-1-1-1m0-4c.55 0 1-.45 1-1V7h2c.55 0 1-.45 1-1s-.45-1-1-1H6c-.55 0-1 .45-1 1v3c0 .55.45 1 1 1m11 7h-2c-.55 0-1 .45-1 1s.45 1 1 1h3c.55 0 1-.45 1-1v-3c0-.55-.45-1-1-1s-1 .45-1 1zM14 6c0 .55.45 1 1 1h2v2c0 .55.45 1 1 1s1-.45 1-1V6c0-.55-.45-1-1-1h-3c-.55 0-1 .45-1 1"/></svg>
+      </button>
+      <iframe id="web-iframe" src="" frameborder="0" width="100%" height="100%"></iframe>
     </div>
 
   </div>
-<script>
-  const initCt   = document.getElementById('init-container');
-  const initIn   = document.getElementById('init-input');
-  const chatCt   = document.getElementById('chat-container');
-  const chatSide = document.getElementById('chat-side');
-  const chatBox  = document.getElementById('chat-box');
-  const chatIn   = document.getElementById('chat-input');
-  const webCt    = document.getElementById('web-content');
-  const webIf    = document.getElementById('web-iframe');
+  <script>
 
-  const refreshBtn = document.getElementById('refresh-web-btn');
-  const closeBtn = document.getElementById('close-web-btn');
+    const socket = connect();
 
-  function scrollDown() {
-    chatBox.scrollTop = chatBox.scrollHeight;
-  }
+    const initCt   = document.getElementById('init-container');
+    const initIn   = document.getElementById('init-input');
+    const chatCt   = document.getElementById('chat-container');
+    const chatSide = document.getElementById('chat-side');
+    const chatBox  = document.getElementById('chat-box');
+    const chatIn   = document.getElementById('chat-input');
+    const webCt    = document.getElementById('web-content');
+    const webIf    = document.getElementById('web-iframe');
 
-  function addMsg(role, txt) {
-    const wrap = document.createElement('div');
-    wrap.className = 'flex items-start space-x-2 ' + (role === 'user' ? 'justify-end' : '');
+    const refreshBtn = document.getElementById('refresh-web-btn');
+    const closeBtn = document.getElementById('close-web-btn');
+    const toggleBtn = document.getElementById('toggle-size-btn');
 
-    const avatar = document.createElement('div');
-    avatar.className = 'w-8 h-8 rounded-full bg-gray-400 flex items-center justify-center text-white';
-    avatar.textContent = role === 'user' ? '我' : 'AI';
-
-    const bubble = document.createElement('div');
-    bubble.className = 'max-w-[75%] px-4 py-2 rounded-lg whitespace-pre-line ' + (role === 'user'? 'bg-blue-500 text-white' : 'bg-gray-200 text-black');
-    bubble.textContent = txt;
-
-    if (role === 'user') {
-      wrap.append(bubble, avatar);
-    } else {
-      wrap.append(avatar, bubble);
+    function scrollDown() {
+      chatBox.scrollTop = chatBox.scrollHeight;
     }
 
-    chatBox.appendChild(wrap);
-    scrollDown();
-  }
+    function startChat(txt) {
+      initCt.classList.add('hidden');
+      chatCt.classList.remove('hidden');
+      chatCt.classList.add('flex', 'flex-col');
+      chatSide.classList.add('w-7/12', 'mx-auto');
+      addMsg('user', txt);
+      sendToAI(txt);
+      chatIn.focus();
+    }
 
-  function typeMsg(text) {
-    const wrap = document.createElement('div');
-    wrap.className = 'flex items-start space-x-2';
+    function sendToAI(text) {
+      if (socket.readyState === WebSocket.OPEN) {
+        socket.send(JSON.stringify({ question: text }));
+      } else {
+        addMsg('ai', 'WebSocket 未连接，无法发送消息');
+      }
+    }
 
-    const avatar = document.createElement('div');
-    avatar.className = 'w-8 h-8 rounded-full bg-gray-400 flex items-center justify-center text-white';
-    avatar.textContent = 'AI';
+    initIn.addEventListener('keydown', e => {
+      if (e.key === 'Enter' && initIn.value.trim()) {
+        startChat(initIn.value.trim());
+      }
+    });
 
-    const bubble = document.createElement('div');
-    bubble.className = 'max-w-[75%] px-4 py-2 rounded-lg whitespace-pre-line bg-gray-200 text-black';
+    chatIn.addEventListener('keydown', e => {
+      if (e.key === 'Enter' && chatIn.value.trim()) {
+        const t = chatIn.value.trim();
+        addMsg('user', t);
+        sendToAI(t);
+        chatIn.value = '';
+      }
+    });
 
-    wrap.append(avatar, bubble);
-    chatBox.appendChild(wrap);
-    scrollDown();
+    closeBtn.addEventListener('click', () => {
+      webCt.classList.add('hidden');
+      webCt.classList.remove('w-1/2', 'h-screen');
+      webIf.src = '';
+      chatCt.classList.replace('flex-row', 'flex-col');
+      chatSide.classList.replace('w-1/2', 'w-7/12');
+      chatSide.classList.add('mx-auto');
+    });
 
-    let i = 0;
-    const timer = setInterval(() => {
-      bubble.textContent += text[i++];
+    refreshBtn.addEventListener('click', () => {
+      webIf.contentWindow?.location.reload();
+    });
+
+
+    toggleBtn.addEventListener('click', () => {
+      const isFull = webCt.classList.contains('fixed');
+
+
+      document.body.classList.toggle('overflow-hidden', isFull);
+
+      if (!isFull) {
+        // 切换到全屏
+        chatSide.classList.add('hidden');
+
+        chatCt.classList.add('flex-col');
+        chatCt.classList.remove('flex-row');
+      
+        webCt.classList.remove('w-1/2', 'm-4')
+        webCt.classList.add('fixed', 'top-0', 'left-0', 'w-full', 'h-full', 'z-50', 'bg-white');
+
+        webIf.classList.add('w-full', 'h-full');
+      } else {
+        // 恢复半屏
+        chatSide.classList.remove('hidden');
+
+        chatCt.classList.remove('flex-col');
+        chatCt.classList.add('flex-row');
+
+        webCt.classList.add('w-1/2', 'm-4')
+        webCt.classList.remove('fixed', 'top-0', 'left-0', 'w-full', 'h-full', 'z-50', 'bg-white');
+
+        webIf.classList.remove('w-full', 'h-full');
+      }
+    });
+
+
+    function addMsg(role, txt) {
+      const wrap = document.createElement('div');
+      wrap.className = 'flex items-start space-x-2 ' + (role === 'user' ? 'justify-end' : '');
+
+      const avatar = document.createElement('div');
+      avatar.className = 'w-8 h-8 rounded-full bg-gray-400 flex items-center justify-center text-white';
+      avatar.textContent = role === 'user' ? '我' : 'AI';
+
+      const bubble = document.createElement('div');
+      bubble.className = 'max-w-[75%] px-4 py-2 rounded-lg whitespace-pre-line ' + (role === 'user'? 'bg-blue-500 text-white' : 'bg-gray-200 text-black');
+      bubble.textContent = txt;
+
+      if (role === 'user') {
+        wrap.append(bubble, avatar);
+      } else {
+        wrap.append(avatar, bubble);
+      }
+
+      chatBox.appendChild(wrap);
       scrollDown();
-      if (i >= text.length) clearInterval(timer);
-    }, 30);
-  }
-
-  function startChat(txt) {
-    initCt.classList.add('hidden');
-    chatCt.classList.remove('hidden');
-    chatCt.classList.add('flex', 'flex-col');
-    chatSide.classList.add('w-7/12', 'mx-auto');
-    addMsg('user', txt);
-    sendToAI(txt);
-    chatIn.focus();
-  }
-
-  function sendToAI(text) {
-    if (socket.readyState === WebSocket.OPEN) {
-      socket.send(JSON.stringify({ question: text }));
-    } else {
-      addMsg('ai', 'WebSocket 未连接，无法发送消息');
-    }
-  }
-
-  initIn.addEventListener('keydown', e => {
-    if (e.key === 'Enter' && initIn.value.trim()) {
-      startChat(initIn.value.trim());
-    }
-  });
-
-  chatIn.addEventListener('keydown', e => {
-    if (e.key === 'Enter' && chatIn.value.trim()) {
-      const t = chatIn.value.trim();
-      addMsg('user', t);
-      sendToAI(t);
-      chatIn.value = '';
-    }
-  });
-
-  closeBtn.addEventListener('click', () => {
-    webCt.classList.add('hidden');
-    webCt.classList.remove('w-1/2', 'h-screen');
-    webIf.src = '';
-    chatCt.classList.replace('flex-row', 'flex-col');
-    chatSide.classList.replace('w-1/2', 'w-7/12');
-    chatSide.classList.add('mx-auto');
-  });
-
-  refreshBtn.addEventListener('click', () => {
-    showWebPreview(url);
-  });
-
-  let socket;
-
-  let url = "";
-
-  function connectWebSocket() {
-    socket = new WebSocket("ws://localhost:8080/chat");
-
-    socket.onmessage = event => {
-      try {
-        let result = event.data;
-        if (typeof result === 'string') {
-          result = JSON.parse(result);
-          if (typeof result === 'string') {
-              result = JSON.parse(result);
-          }
-        }
-
-        console.log(result)
-
-        // deepseek
-        if (result.response) {
-          return typeMsg(result.response);
-        }
-        
-        if (result.error) {
-          return typeMsg(result.error);
-        }
-        
-        // app
-        if (result.code !== 200 || !result.data) {
-          return typeMsg(result.msg)
-        } 
-
-        if (result.type == 'url') {
-            url = result.data
-            showWebPreview(result.data);
-        }
-
-        if (result.type == 'comic') {
-          if (result.data.albums) {
-            updateComicCard(result.data)
-          } else {
-            comicCard(result.data)
-          }
-        }
-
-        if (result.type == 'link') {
-
-        }
-        
-      } catch (e) {
-        console.error(e);
-      }
-    };
-
-    socket.onclose = () => {
-      setTimeout(connectWebSocket, 3000);
-    };
-  }
-
-  function downloadFile(url, filename) {
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename || ''; // 可选：指定下载时的文件名
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-  }
-
-  function showWebPreview(url) {
-    chatCt.classList.replace('flex-col', 'flex-row');
-    chatSide.classList.replace('w-7/12', 'w-1/2');
-    webCt.classList.remove('hidden');
-    webCt.classList.add('w-1/2','h-auto','m-4');
-    webIf.src = window.location.origin + url;
-  }
-
-  function comicCard(comic) {
-    const card = document.createElement('div');
-    card.className = 'flex flex-col overflow-hidden rounded-lg shadow group p-4 bg-[#fffdf8] border border-[#e8e4d9] hover:border-[#d6cbaa] transition-colors duration-300 shadow-sm hover:shadow-md hover:bg-[#fefcf5] w-full max-w-md';
-
-    // 第 1 行：封面图
-    const cover = document.createElement('img');
-    cover.src = comic.covers?.[1] || comic.covers?.[0] || '';
-    cover.alt = comic.title;
-    cover.className = 'w-full aspect-[3/4] object-cover rounded-md shadow';
-
-    // 第 2 行：标题
-    const titleWrap = document.createElement('div');
-    titleWrap.className = 'overflow-hidden mt-2 text-center';
-
-    const title = document.createElement('div');
-    title.className = 'whitespace-nowrap inline-block title-text group-hover:animate-marquee';
-    title.textContent = comic.title;
-
-    // 检查是否需要滚动动画
-    setTimeout(() => {
-      const parent = title.parentElement;
-      if (title.scrollWidth <= parent.clientWidth) {
-        title.classList.remove('group-hover:animate-marquee');
-      }
-    }, 0);
-
-    titleWrap.appendChild(title);
-
-    // 第 3 行：简介（最多显示三行，鼠标悬停显示完整）
-    const description = document.createElement('p');
-    description.textContent = comic.description || '暂无简介';
-    description.title = description.textContent; // 鼠标悬停显示
-    description.className = 'text-sm text-gray-600 leading-relaxed mt-2 line-clamp-3';
-
-    // 第 4 行：按钮
-    const button = document.createElement('button');
-    button.textContent = '下载阅读';
-    button.className = 'mt-4 self-center bg-blue-500 hover:bg-blue-600 text-white px-5 py-2 rounded-full shadow transition';
-    button.onclick = () => {
-      url = comic.url;
-      showWebPreview(url);
-    };
-
-    card.append(cover, titleWrap, description, button);
-
-    // 包一层头像
-    const wrap = document.createElement('div');
-    wrap.className = 'flex items-start space-x-3 px-2 py-4';
-
-    const avatar = document.createElement('div');
-    avatar.className = 'w-10 h-10 rounded-full bg-gray-400 flex items-center justify-center text-white font-bold text-sm';
-    avatar.textContent = 'AI';
-
-    wrap.append(avatar, card);
-
-    chatBox.appendChild(wrap);
-    scrollDown();
-  }
-
-  function updateComicCard(comic) {
-    const card = document.createElement('div');
-    card.className = 'flex flex-col bg-white rounded-xl shadow p-4 w-full max-w-xl space-y-4';
-
-    // 1. 漫画封面
-    const cover = document.createElement('img');
-    cover.src = comic.covers?.[0] || '';
-    cover.alt = comic.title || '漫画封面';
-    cover.className = 'w-full rounded-md aspect-[3/4] object-cover';
-
-    // 2. 简介
-    const description = document.createElement('div');
-    description.textContent = comic.description || '暂无简介';
-    description.className = 'text-sm text-gray-700 leading-relaxed max-h-24 overflow-y-auto';
-
-    // 3. 操作按钮行
-    const buttonRow = document.createElement('div');
-    buttonRow.className = 'flex justify-between gap-3';
-
-    const downloadBtn = document.createElement('button');
-    downloadBtn.textContent = '下载';
-    downloadBtn.className = baseBtnClass();
-    downloadBtn.onclick = () => downloadComic(comic);
-
-    const updateBtn = document.createElement('button');
-    updateBtn.textContent = '更新';
-    updateBtn.className = baseBtnClass('bg-blue-500 hover:bg-blue-600');
-    updateBtn.onclick = () => updateComic(comic);
-
-    const deleteBtn = document.createElement('button');
-    deleteBtn.textContent = '删除';
-    deleteBtn.className = baseBtnClass('bg-red-500 hover:bg-red-600');
-    deleteBtn.onclick = () => deleteComic(comic);
-
-    buttonRow.append(downloadBtn, updateBtn, deleteBtn);
-
-    // 4. 章节目录（顺序/逆序切换 + 列表）
-    const dirContainer = document.createElement('div');
-    dirContainer.className = 'flex flex-col space-y-2';
-
-    const dirHeader = document.createElement('div');
-    dirHeader.className = 'flex justify-between items-center';
-
-    const dirTitle = document.createElement('span');
-    dirTitle.textContent = '目录';
-    dirTitle.className = 'font-semibold text-gray-800';
-
-    const toggleBtn = document.createElement('button');
-    toggleBtn.textContent = '逆序';
-    toggleBtn.className = 'text-blue-500 text-sm hover:underline cursor-pointer';
-
-    let reversed = false;
-    toggleBtn.onclick = () => {
-      reversed = !reversed;
-      toggleBtn.textContent = reversed ? '顺序' : '逆序';
-      renderChapters();
-    };
-
-    dirHeader.append(dirTitle, toggleBtn);
-
-    const chapterList = document.createElement('div');
-    chapterList.className = 'max-h-40 overflow-y-auto flex flex-col gap-1 text-sm text-gray-600';
-
-    function renderChapters() {
-      chapterList.innerHTML = '';
-      const chapters = reversed ? [...comic.albums].reverse() : comic.albums;
-      chapters.forEach(album => {
-        const link = document.createElement('a');
-        link.textContent = "第" + album.index + "话";
-        link.href = "#"; // 防止直接跳转
-        link.target = '_self'; // 无需打开新标签
-        link.className = 'hover:text-blue-500 truncate cursor-pointer';
-        
-        // 添加点击事件：调用 showWebPreview
-        link.addEventListener('click', (e) => {
-          e.preventDefault(); // 阻止默认跳转
-          const previewUrl = '/comic/' + comic.id + "/album/" + album.id + "/index.html";
-          showWebPreview(previewUrl);
-        });
-
-        chapterList.appendChild(link);
-      });
     }
 
-    function showWebPreview(url) {
+    function typeMsg(text) {
+      const wrap = document.createElement('div');
+      wrap.className = 'flex items-start space-x-2';
+
+      const avatar = document.createElement('div');
+      avatar.className = 'w-8 h-8 rounded-full bg-gray-400 flex items-center justify-center text-white';
+      avatar.textContent = 'AI';
+
+      const bubble = document.createElement('div');
+      bubble.className = 'max-w-[75%] px-4 py-2 rounded-lg whitespace-pre-line bg-gray-200 text-black';
+
+      wrap.append(avatar, bubble);
+      chatBox.appendChild(wrap);
+      scrollDown();
+
+      let i = 0;
+      const timer = setInterval(() => {
+        bubble.textContent += text[i++];
+        scrollDown();
+        if (i >= text.length) clearInterval(timer);
+      }, 30);
+    }
+
+    function connect() {
+      let socket = new WebSocket("ws://localhost:8080/chat");
+      socket.onmessage = ({data}) => {
+        try {
+          const result = deepParseJson(data);
+          console.log(result);
+          if (result.response) return typeMsg(result.response);
+          if (result.error) return typeMsg(result.error);
+          if (result.code !== 200 || !result.data) return typeMsg(result.msg);
+          if (result.type === 'url') return open(result.data);
+          if (result.type === 'comic') return render(result.data);
+          if (result.type === 'file') return download(result.data);
+        } catch (e) {
+          console.error(e);
+        }
+      };
+      socket.onclose = () => setTimeout(connect, 3000);
+
+      return socket;
+    }
+
+    function deepParseJson(data) {
+      let parsed = JSON.parse(data);
+      return typeof parsed === 'string' ? deepParseJson(parsed) : parsed;
+    }
+
+    function open(url) {
       chatCt.classList.replace('flex-col', 'flex-row');
       chatSide.classList.replace('w-7/12', 'w-1/2');
       webCt.classList.remove('hidden');
@@ -409,27 +243,129 @@
       webIf.src = window.location.origin + url;
     }
 
-    renderChapters();
-    dirContainer.append(dirHeader, chapterList);
+    function render(comic) {
+      const card = document.createElement('div');
+      card.className = 'flex flex-col max-w-xs bg-white rounded-lg border border-gray-200 shadow-lg overflow-hidden';
 
-    // 组装
-    card.append(cover, description, buttonRow, dirContainer);
+      const img = document.createElement('img');
+      img.src = comic.covers && comic.covers.length > 0 ? comic.covers[0] : '';
+      img.alt = comic.title || '';
+      img.className = 'w-full aspect-[3/4] object-cover';
+      card.appendChild(img);
+
+      const titleDiv = document.createElement('div');
+      titleDiv.className = 'p-2 text-sm font-semibold text-gray-800 truncate';
+      titleDiv.textContent = comic.title || '无标题';
+      card.appendChild(titleDiv);
+
+      const descDiv = document.createElement('div');
+      descDiv.className = 'p-2 text-xs text-gray-600 border-t border-gray-100';
+      descDiv.textContent = comic.description || '暂无简介';
+      card.appendChild(descDiv);
+
+      const actionsDiv = document.createElement('div');
+      actionsDiv.className = 'flex justify-between p-2 border-t border-gray-100 space-x-2';
+      ['下载', '同步', '删除'].forEach(function(label) {
+        const btn = document.createElement('button');
+        let colorClasses = 'bg-blue-500 hover:bg-blue-600';
+        if (label === '同步') colorClasses = 'bg-yellow-500 hover:bg-yellow-600';
+        if (label === '删除') colorClasses = 'bg-red-500 hover:bg-red-600';
+
+        btn.className = 'flex-1 px-2 py-1 text-xs text-white rounded ' + colorClasses + ' transition transform hover:scale-105';
+        btn.textContent = label;
+        btn.onclick = function() {
+          if (label === '下载') socket.send("下载动漫" + comic.id);
+          if (label === '同步') socket.send("同步动漫" + comic.id);
+          if (label === '删除') socket.send("删除动漫" + comic.id);
+        };
+        actionsDiv.appendChild(btn);
+      });
+      card.appendChild(actionsDiv);
+
+      if (comic.albums && Array.isArray(comic.albums)) {
+        const ctrlDiv = document.createElement('div');
+        ctrlDiv.className = 'flex justify-between items-center p-2 border-t border-gray-100';
+
+        const labelEl = document.createElement('label');
+        labelEl.htmlFor = 'order-' + comic.id;
+        labelEl.className = 'text-xs text-gray-700';
+        labelEl.textContent = '排序：';
+
+        const select = document.createElement('select');
+        select.id = 'order-' + comic.id;
+        select.className = 'text-xs border border-gray-300 rounded px-1 py-0.5 focus:outline-none focus:ring focus:border-blue-300';
+
+        [['asc', '正序'], ['desc', '倒序']].forEach(function(optArr) {
+          const opt = document.createElement('option');
+          opt.value = optArr[0];
+          opt.textContent = optArr[1];
+          select.appendChild(opt);
+        });
+
+        ctrlDiv.appendChild(labelEl);
+        ctrlDiv.appendChild(select);
+        card.appendChild(ctrlDiv);
+
+        const chaptersDiv = document.createElement('div');
+        chaptersDiv.className = 'h-24 overflow-y-auto p-2 bg-gray-50';
+
+        var ul = document.createElement('ul');
+        ul.className = 'list-none';
+        chaptersDiv.appendChild(ul);
+        card.appendChild(chaptersDiv);
+
+        var renderChapters = function() {
+          ul.innerHTML = '';
+          var list = select.value === 'desc' ? comic.albums.slice().reverse() : comic.albums;
+          list.forEach(function(a) {
+            var li = document.createElement('li');
+            li.className = 'px-2 py-1 text-xs text-gray-700 truncate hover:bg-gray-100 cursor-pointer';
+            li.textContent = '第' + a.index + '话';
+            li.onclick = function() {
+              li.classList.add('text-blue-600', 'font-semibold', 'bg-blue-50');
+              open('/comic/' + comic.id + '/album/' + a.id + '/index.html');
+            };
+            ul.appendChild(li);
+          });
+        };
+
+        select.addEventListener('change', renderChapters);
+        renderChapters();
+    }
 
     const wrap = document.createElement('div');
-    wrap.className = 'flex justify-center p-4';
+    wrap.className = 'flex items-start space-x-2 p-2';
+
+    const avatar = document.createElement('div');
+    avatar.className = 'w-6 h-6 rounded-full bg-gray-400 flex items-center justify-center text-white text-xs';
+    avatar.textContent = 'AI';
+
+    wrap.appendChild(avatar);
     wrap.appendChild(card);
     chatBox.appendChild(wrap);
     scrollDown();
   }
 
-  // 公共按钮样式生成
-  function baseBtnClass(extra = 'bg-gray-300 hover:bg-gray-400') {
-    return 'flex-1 py-2 rounded font-semibold text-white transition ' + extra;
-  }
 
-
-  connectWebSocket();
-</script>
-
+    async function download(filename) {
+      addMsg('ai', '开始下载：' + filename);
+      try {
+        const res = await fetch("/download?filename=" + encodeURIComponent(filename));
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        addMsg('ai', '下载完成：' + filename);
+      } catch (err) {
+        addMsg('ai', '下载失败：' + err.message);
+      }
+    }
+  </script>
 </body>
 </html>
