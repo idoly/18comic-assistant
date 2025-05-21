@@ -51,7 +51,7 @@ public class ChatHandler extends TextWebSocketHandler {
         }
     }
 
-    @Tool(description = "查看书架", returnDirect = true)
+    @Tool(description = "打开/查看书架", returnDirect = true)
     public Result<String> index() {
         return Result.success("/index.html").type("url");
     }

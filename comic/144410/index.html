@@ -14,82 +14,22 @@
 
     <div class="w-full md:w-1/2 flex flex-col bg-white rounded shadow overflow-hidden">
       <div class="p-4">
-        <p class="text-gray-700 text-sm md:text-base">FreeMarker template error (DEBUG mode; use RETHROW in production!):
-The following has evaluated to null or missing:
-==> comic.description  [in template "comic.ftl" at line 17, column 57]
+        <p class="text-gray-700 text-sm md:text-base"></p>
+      </div>
 
-----
-Tip: It's the step after the last dot that caused this error, not those before it.
-----
-Tip: If the failing expression is known to legally refer to something that's sometimes null or missing, either specify a default value like myOptionalVar!myDefault, or use <#if myOptionalVar??>when-present<#else>when-missing</#if>. (These only cover the last step of the expression; to cover the whole expression, use parenthesis: (myOptionalVar.foo)!myDefault, (myOptionalVar.foo)??
-----
-
-----
-FTL stack trace ("~" means nesting-related):
-	- Failed at: ${comic.description}  [in template "comic.ftl" at line 17, column 55]
-----
-
-Java stack trace (for programmers):
-----
-freemarker.core.InvalidReferenceException: [... Exception message was already printed; see it above ...]
-	at freemarker.core.InvalidReferenceException.getInstance(InvalidReferenceException.java:134)
-	at freemarker.core.EvalUtil.coerceModelToTextualCommon(EvalUtil.java:490)
-	at freemarker.core.EvalUtil.coerceModelToStringOrMarkup(EvalUtil.java:410)
-	at freemarker.core.EvalUtil.coerceModelToStringOrMarkup(EvalUtil.java:379)
-	at freemarker.core.DollarVariable.calculateInterpolatedStringOrMarkup(DollarVariable.java:104)
-	at freemarker.core.DollarVariable.accept(DollarVariable.java:63)
-	at freemarker.core.Environment.visit(Environment.java:344)
-	at freemarker.core.Environment.visit(Environment.java:350)
-	at freemarker.core.Environment.process(Environment.java:323)
-	at freemarker.template.Template.process(Template.java:383)
-	at xyz.idoly.comic.service.ComicService.template(ComicService.java:687)
-	at xyz.idoly.comic.service.ComicService.templateComic(ComicService.java:664)
-	at xyz.idoly.comic.service.ComicService.download(ComicService.java:267)
-	at xyz.idoly.comic.service.ComicService.downloadComic(ComicService.java:292)
-	at xyz.idoly.comic.service.ComicService.downloadComic(ComicService.java:277)
-	at xyz.idoly.comic.service.ChatHandler.downloadComic(ChatHandler.java:101)
-	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:104)
-	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
-	at org.springframework.ai.tool.method.MethodToolCallback.callMethod(MethodToolCallback.java:166)
-	at org.springframework.ai.tool.method.MethodToolCallback.call(MethodToolCallback.java:109)
-	at org.springframework.ai.model.tool.DefaultToolCallingManager.lambda$executeToolCall$5(DefaultToolCallingManager.java:224)
-	at io.micrometer.observation.Observation.observe(Observation.java:564)
-	at org.springframework.ai.model.tool.DefaultToolCallingManager.executeToolCall(DefaultToolCallingManager.java:221)
-	at org.springframework.ai.model.tool.DefaultToolCallingManager.executeToolCalls(DefaultToolCallingManager.java:137)
-	at org.springframework.ai.deepseek.DeepSeekChatModel.internalCall(DeepSeekChatModel.java:195)
-	at org.springframework.ai.deepseek.DeepSeekChatModel.call(DeepSeekChatModel.java:136)
-	at org.springframework.ai.chat.client.advisor.ChatModelCallAdvisor.adviseCall(ChatModelCallAdvisor.java:54)
-	at org.springframework.ai.chat.client.advisor.DefaultAroundAdvisorChain.lambda$nextCall$1(DefaultAroundAdvisorChain.java:110)
-	at io.micrometer.observation.Observation.observe(Observation.java:564)
-	at org.springframework.ai.chat.client.advisor.DefaultAroundAdvisorChain.nextCall(DefaultAroundAdvisorChain.java:110)
-	at org.springframework.ai.chat.client.DefaultChatClient$DefaultCallResponseSpec.lambda$doGetObservableChatClientResponse$1(DefaultChatClient.java:467)
-	at io.micrometer.observation.Observation.observe(Observation.java:564)
-	at org.springframework.ai.chat.client.DefaultChatClient$DefaultCallResponseSpec.doGetObservableChatClientResponse(DefaultChatClient.java:465)
-	at org.springframework.ai.chat.client.DefaultChatClient$DefaultCallResponseSpec.doGetObservableChatClientResponse(DefaultChatClient.java:446)
-	at org.springframework.ai.chat.client.DefaultChatClient$DefaultCallResponseSpec.content(DefaultChatClient.java:441)
-	at xyz.idoly.comic.service.ChatHandler.handleTextMessage(ChatHandler.java:43)
-	at org.springframework.web.socket.handler.AbstractWebSocketHandler.handleMessage(AbstractWebSocketHandler.java:43)
-	at org.springframework.web.socket.handler.WebSocketHandlerDecorator.handleMessage(WebSocketHandlerDecorator.java:75)
-	at org.springframework.web.socket.handler.LoggingWebSocketHandlerDecorator.handleMessage(LoggingWebSocketHandlerDecorator.java:56)
-	at org.springframework.web.socket.handler.ExceptionWebSocketHandlerDecorator.handleMessage(ExceptionWebSocketHandlerDecorator.java:58)
-	at org.springframework.web.socket.adapter.standard.StandardWebSocketHandlerAdapter.handleTextMessage(StandardWebSocketHandlerAdapter.java:113)
-	at org.springframework.web.socket.adapter.standard.StandardWebSocketHandlerAdapter$3.onMessage(StandardWebSocketHandlerAdapter.java:84)
-	at org.springframework.web.socket.adapter.standard.StandardWebSocketHandlerAdapter$3.onMessage(StandardWebSocketHandlerAdapter.java:81)
-	at org.apache.tomcat.websocket.WsFrameBase.sendMessageText(WsFrameBase.java:390)
-	at org.apache.tomcat.websocket.server.WsFrameServer.sendMessageText(WsFrameServer.java:130)
-	at org.apache.tomcat.websocket.WsFrameBase.processDataText(WsFrameBase.java:484)
-	at org.apache.tomcat.websocket.WsFrameBase.processData(WsFrameBase.java:284)
-	at org.apache.tomcat.websocket.WsFrameBase.processInputBuffer(WsFrameBase.java:130)
-	at org.apache.tomcat.websocket.server.WsFrameServer.onDataAvailable(WsFrameServer.java:85)
-	at org.apache.tomcat.websocket.server.WsFrameServer.doOnDataAvailable(WsFrameServer.java:184)
-	at org.apache.tomcat.websocket.server.WsFrameServer.notifyDataAvailable(WsFrameServer.java:164)
-	at org.apache.tomcat.websocket.server.WsHttpUpgradeHandler.upgradeDispatch(WsHttpUpgradeHandler.java:152)
-	at org.apache.coyote.http11.upgrade.UpgradeProcessorInternal.dispatch(UpgradeProcessorInternal.java:60)
-	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:57)
-	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:905)
-	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1743)
-	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52)
-	at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1190)
-	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:659)
-	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:63)
-	at java.base/java.lang.Thread.run(Thread.java:1447)
+      <div class="p-4 border-t flex-1 overflow-y-auto">
+        <div class="flex flex-col gap-2">
+            <a href="album/144410/index.html" class="block px-4 py-2 bg-gray-100 rounded hover:bg-gray-200 transition">第0话</a>
+            <a href="album/144411/index.html" class="block px-4 py-2 bg-gray-100 rounded hover:bg-gray-200 transition">第1话</a>
+            <a href="album/144412/index.html" class="block px-4 py-2 bg-gray-100 rounded hover:bg-gray-200 transition">第2话</a>
+            <a href="album/144413/index.html" class="block px-4 py-2 bg-gray-100 rounded hover:bg-gray-200 transition">第3话</a>
+            <a href="album/144414/index.html" class="block px-4 py-2 bg-gray-100 rounded hover:bg-gray-200 transition">第4话</a>
+            <a href="album/144415/index.html" class="block px-4 py-2 bg-gray-100 rounded hover:bg-gray-200 transition">第5话</a>
+            <a href="album/144416/index.html" class="block px-4 py-2 bg-gray-100 rounded hover:bg-gray-200 transition">第6话</a>
+            <a href="album/144417/index.html" class="block px-4 py-2 bg-gray-100 rounded hover:bg-gray-200 transition">第7话</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

@@ -566,3 +566,15 @@ update comic set description = "結婚已經快滿一年，人妻優愛過著和
 	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:659)
 	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:63)
 	at java.base/java.lang.Thread.run(Thread.java:1447)
+2025-05-21 08:36:05.627318+08:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "update comic set title='精奇打工仔' where id =[*]‘229332 ’"; SQL statement:
+update comic set title='精奇打工仔' where id =‘229332 ’ [42000-232]
+2025-05-21 08:36:14.692142+08:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "update comic set title='精奇打工仔' where id =[*]‘229332’"; SQL statement:
+update comic set title='精奇打工仔' where id =‘229332’ [42000-232]
+2025-05-21 08:36:22.694987+08:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "update comic set title=[*]”精奇打工仔“ where id =‘229332’"; SQL statement:
+update comic set title=”精奇打工仔“ where id =‘229332’ [42000-232]
+2025-05-21 08:36:34.690963+08:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "update comic set title=[*]”精奇打工仔“ where id =”229332“"; SQL statement:
+update comic set title=”精奇打工仔“ where id =”229332“ [42000-232]

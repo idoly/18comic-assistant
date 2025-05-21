@@ -30,7 +30,6 @@ import javax.imageio.ImageIO;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.logging.log4j.util.Strings;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -39,6 +38,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.DigestUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestClient;
 
 import freemarker.template.Configuration;
@@ -102,7 +102,7 @@ public class ComicService {
             if (config.getUrls().isEmpty()) fetchUrls();
             log.info("comic urls: " + config.getUrls());
 
-            if (Strings.isNotEmpty(config.getUsername()) && Strings.isNotEmpty(config.getPassword())) {
+            if (StringUtils.hasText(config.getUsername()) && StringUtils.hasText(config.getPassword())) {
                 login(config.getUsername(), config.getPassword());
             } 
         } catch (Exception e) {
@@ -733,7 +733,7 @@ public class ComicService {
     }
 
     private String getTitle(Document doc) {
-        return doc.select("#wrapper > div.container > div:nth-child(4) > div > h1").text();
+        return doc.select(" #book-name").text();
     }
 
     private List<String> getCovers(Document doc) {
@@ -828,7 +828,7 @@ public class ComicService {
     }
 
     public Result<List<String>> queryFavorites() {
-        if (Strings.isEmpty(config.getUsername()) || Strings.isEmpty(config.getPassword())) {
+        if (!StringUtils.hasText(config.getUsername()) || !StringUtils.hasText(config.getPassword())) {
             log.error("queryFavorites failed: account or password is empty – automatic login failed; please log in manually");
             return Result.error("Account or password is empty. Please log in manually.");
         }
@@ -854,7 +854,7 @@ public class ComicService {
     }
 
     public Result<List<Result<Comic>>> downloadFavorites() {
-        if (Strings.isEmpty(config.getUsername()) || Strings.isEmpty(config.getPassword())) {
+        if (!StringUtils.hasText(config.getUsername()) || !StringUtils.hasText(config.getPassword())) {
             log.error("downloadFavorites failed: account or password is empty – automatic login failed; please log in manually");
             return Result.error("Account or password is empty. Please log in manually.");
         }
